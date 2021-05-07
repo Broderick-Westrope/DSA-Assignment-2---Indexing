@@ -1,0 +1,3 @@
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/cmake-build-debug/CMakeFiles/DSA_Indexing_Assignment2.dir
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/cmake-build-debug/CMakeFiles/rebuild_cache.dir
