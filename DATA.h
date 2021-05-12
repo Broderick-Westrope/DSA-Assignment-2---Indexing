@@ -9,39 +9,54 @@ using namespace std;
 
 class ARTICLE //The articles's data
 {
+    int instances = pos.size();
 public:
     string path;
-    double freq;
     vector<int> pos;
 
-    ARTICLE(string _path, double _freq) : path(_path), freq(_freq)
+    ARTICLE(string _path) : path(_path)
     {};
+
+    int GetInstances()
+    {
+        return instances;
+    }
 };
 
 class DATA //The Node's data
 {
+    double freq;
 public:
     string key;
     vector<ARTICLE> data;
+
+    double GetFrequency(int _wordCount)
+    {
+        double total = GetInstances();
+        return (total / static_cast<double>(_wordCount)) * 1000.0;
+    }
+
+    int GetInstances()
+    {
+        int total = 0;
+        if (!data.empty())
+            for (auto d:data)
+            {
+                total += d.GetInstances();
+            }
+        return total;
+    }
 };
 
-bool operator<(const DATA &p1, const DATA &p2)
+bool operator<(DATA p1, DATA p2)
 {
-    int high1 = 0, high2 = 0;
-    for (int i = 0; i < p1.data.size(); i++)
-        if (p1.data[i].freq > high1)
-            high1 = p1.data[i].freq;
-    for (int i = 0; i < p1.data.size(); i++)
-        if (p2.data[i].freq > high2)
-            high2 = p2.data[i].freq;
-
-    return high1 < high2;
+    return p1.GetFrequency(WORD_COUNT) < p2.GetFrequency(WORD_COUNT);
 }
 
 istream &operator>>(istream &in, DATA &obj) //Loading Save
 {
 //    string key, path;
-//    int freq;
+//    int occurences;
 //    vector<int> pos;
 //
 //    //Line
@@ -74,7 +89,7 @@ istream &operator>>(istream &in, DATA &obj) //Loading Save
 //    for (ARTICLE d : obj.data)
 //    {
 //        string fName = d.path.substr(9, 7);
-//        out << obj.key << ' ' << d.freq << ' ' << fName;
+//        out << obj.key << ' ' << d.occurences << ' ' << fName;
 //        for (int i : d.pos)
 //            out << ' ' << to_string(i);
 //        out << endl;
@@ -82,20 +97,25 @@ istream &operator>>(istream &in, DATA &obj) //Loading Save
     return in;
 }
 
-ostream &operator<<(ostream &out, const DATA &obj) //Saving Data
+ostream &operator<<(ostream &out, DATA &obj) //Saving Data
 {
+    out << obj.key << endl;
+
     for (ARTICLE d : obj.data)
     {
-        string fName = d.path.substr(9, 7);
-        out << obj.key << ' ' << d.freq << ' ' << fName << '[';
+//        string fName = d.path.substr(9, 7);
+        out << d.path << ' ';
+
         for (int i = 0; i < d.pos.size(); i++)
         {
-            out << to_string(d.pos[i]);
-            if (i != d.pos.size() - 1)
-                out << ',';
+            out << to_string(d.pos[i]) << ' ';
+//            if (i == d.pos.size() - 1)
+//                out << '|';
         }
-        out << ']' << endl;
+        out << endl;
     }
+
+    out << "# " << endl;
     return out;
 }
 

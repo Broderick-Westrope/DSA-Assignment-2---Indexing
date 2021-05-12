@@ -35,28 +35,11 @@ vector<pair<DATA, int>> quickSort(vector<pair<DATA, int>> _v, int low, int high)
 {
     if (low < high)
     {
-        /* pi is partitioning index, _v[p] is now
-           at right place */
-//        cout << "BEFORE: ";
-//        for (int i = 0; i < _v.size(); i++)
-//        {
-//            cout << ", " << _v[i].first.key;
-//        }
-//        cout << endl;
         int pi = partition(_v, low, high);
-//        cout << "AFTER: ";
-//        for (int i = 0; i < _v.size(); i++)
-//        {
-//            cout << ", " << _v[i].first.key;
-//        }
-//        cout << endl;
-        // Separately sort elements before
-        // partition and after partition
+
         _v = quickSort(_v, low, pi - 1);
         _v = quickSort(_v, pi + 1, high);
     }
-    else
-        cout << "low = high" << endl;
 
     return _v;
 }

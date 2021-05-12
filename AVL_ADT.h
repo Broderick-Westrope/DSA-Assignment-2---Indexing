@@ -808,9 +808,6 @@ void AvlTree<TYPE, KTYPE>
         if (node->right != nullptr)
             q.push(node->right);
     }
-
-    cout << "BREADTH: " << c << endl;
-    cout << "COUNT: " << count << endl;
 }
 
 
@@ -962,6 +959,55 @@ void AvlTree<TYPE, KTYPE>::_print(NODE<TYPE> *root,
 
 } /* AVL_Print */
 
+//template<class TYPE, class KTYPE>
+//vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetNodesContaining(TYPE _node, int (*comparison)(TYPE n1, TYPE n2, int diff))
+//{
+//    // Initialize minimum difference
+//    int minDiff = INT_MAX;
+//    vector<pair<TYPE, int>> minDiffNodes;
+//
+//    // Find value of minDiffNodes (Closest key
+//    // in tree with k)
+//    _closestNode(tree, _node, minDiff, minDiffNodes, comparison);
+//    reverse(minDiffNodes.begin(), minDiffNodes.end());
+//
+//    return minDiffNodes;
+//}
+//
+//template<class TYPE, class KTYPE>
+//void AvlTree<TYPE, KTYPE>::_containingNodes(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE n1, TYPE n2, int diff))
+//{
+//    if (ptr == NULL)
+//    {
+//        printf("NULL REACHED\n");
+//        return;
+//    }
+//
+//    int diff = comparison(ptr->data, _node, diff);
+//
+//    // If the target itself is present (no difference in keys)
+//    if (diff == 0)
+//    {
+//        minDiffNodes.push_back(make_pair(ptr->data, diff));
+//        return;
+//    }
+//
+//    // update minDiff and minDiffNodes by checking
+//    // current node value
+//    if (diff <= minDiff)
+//    {
+//        minDiff = diff;
+//    }
+//    minDiffNodes.push_back(make_pair(ptr->data, diff)); //! move to inside the above for loop if you want to only get prograssive results (less results but more accurate when not looking at occurences)
+//
+//    // if the target is less than ptr->key then move in
+//    // left subtree else in right subtree
+//    if (_node.key < ptr->data.key)
+//        _closestNode(ptr->left, _node, minDiff, minDiffNodes, comparison);
+//    else
+//        _closestNode(ptr->right, _node, minDiff, minDiffNodes, comparison);
+//}
+
 template<class TYPE, class KTYPE>
 vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE n1, TYPE n2, int diff))
 {
@@ -971,12 +1017,8 @@ vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, in
 
     // Find value of minDiffNodes (Closest key
     // in tree with k)
-    cout << "SIZE BEFORE: " << minDiffNodes.size() << endl;
     _closestNode(tree, _node, minDiff, minDiffNodes, comparison);
-    cout << "SIZE AFTER: " << minDiffNodes.size() << endl;
-    cout << "FIRST ELEMENT: " << minDiffNodes[0].first.key << endl;
     reverse(minDiffNodes.begin(), minDiffNodes.end());
-    cout << "FIRST ELEMENT: " << minDiffNodes[0].first.key << endl;
 
     return minDiffNodes;
 }
@@ -991,7 +1033,6 @@ void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDif
     }
 
     int diff = comparison(ptr->data, _node, diff);
-    cout << ptr->data.key << " - " << diff << endl;
 
     // If the target itself is present (no difference in keys)
     if (diff == 0)
@@ -1006,7 +1047,8 @@ void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDif
     {
         minDiff = diff;
     }
-    minDiffNodes.push_back(make_pair(ptr->data, diff)); //! move to inside the above for loop if you want to only get prograssive results (less results but more accurate when not looking at freq)
+    minDiffNodes.push_back(
+            make_pair(ptr->data, diff)); //! move to inside the above for loop if you want to only get prograssive results (less results but more accurate when not looking at occurences)
 
     // if the target is less than ptr->key then move in
     // left subtree else in right subtree
