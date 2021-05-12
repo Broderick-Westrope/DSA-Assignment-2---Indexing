@@ -43,8 +43,8 @@ int main()
     if (!tree.AVL_Empty())
         cout << "ERROR: New tree wasn't empty." << endl;
 
-//    int count = LoadNodes("..\\save.txt", &tree);
-    int count = ScanBook(&tree);
+    int count = LoadNodes("..\\save.txt", &tree);
+//    int count = ScanBook(&tree);
     cout << "Gathered " << to_string(count) << " words." << endl;
     cout << "AVL Tree has " << tree.AVL_Count() << " words." << endl;
 
@@ -94,9 +94,9 @@ int ScanBook(AvlTree<DATA, string> *_tree)
     int wordCount = 0;
     for (int i = 1; i <= 6; i++)
     {
-        WORD_COUNT = ScanChapter("..\\texts\\CH" + to_string(i) + ".txt", _tree);
-        wordCount += WORD_COUNT;
+        wordCount += ScanChapter("..\\texts\\CH" + to_string(i) + ".txt", _tree);
     }
+    WORD_COUNT = wordCount;
     return wordCount;
 }
 
@@ -112,7 +112,7 @@ int ScanChapter(const string &_file, AvlTree<DATA, string> *_tree)
         cout << "ERROR: Failed to open the file " << _file << " for scanning." << endl;
     }
 
-    int wordPos = 0;
+    int wordPos = 1;
     int totalWordCount = 0;
     DATA newData;
 
@@ -200,13 +200,9 @@ void PrintRow(DATA *_node)
 
 void SaveNode(DATA _node)
 {
-    for (ARTICLE &d : _node.data)
-    {
-        string fName = d.path.substr(9, 7);
-        ofstream saveFile("..\\save.txt", ios_base::app);
-        saveFile << _node;
-        saveFile.close();
-    }
+    ofstream saveFile("..\\save.txt", ios_base::app);
+    saveFile << _node;
+    saveFile.close();
 }
 
 //Function which parses out a string based on the delimiter of choice. The results are stored back into a vector which is passed in by memory the address
