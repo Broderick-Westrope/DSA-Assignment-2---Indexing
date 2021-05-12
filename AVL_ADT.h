@@ -49,8 +49,8 @@ private:
     NODE<TYPE> *_retrieve(KTYPE key,
                           NODE<TYPE> *root);
 
-    void _traversal(void (*process)(TYPE dataProc),
-                    NODE<TYPE> *root);
+    void _traversalInOrder(void (*process)(TYPE *dataProc),
+                           NODE<TYPE> *root);
 
     void _destroyAVL(NODE<TYPE> *root);
 
@@ -58,6 +58,8 @@ private:
     void _print(NODE<TYPE> *root, int level);
 
     void _closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE, TYPE, int));
+
+    void _traversalBreadth(void (*process)(TYPE), NODE<TYPE> *root);
 
 public:
     AvlTree(void);
@@ -70,7 +72,7 @@ public:
 
     bool AVL_Retrieve(KTYPE key, TYPE &dataOut);
 
-    void AVL_Traverse(void (*process)(TYPE dataProc)); //in-order
+    void AVL_TraverseInOrder(void (*process)(TYPE *dataProc)); //in-order
 
     bool AVL_Update(KTYPE key, TYPE newF);
 
@@ -85,6 +87,7 @@ public:
 
     vector<pair<TYPE, int>> AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE, TYPE, int));
 
+    void AVL_TraverseBreadth(void (*process)(TYPE));
 }; // class AvlTree
 
 /*	=================== Constructor ===================	
@@ -721,7 +724,7 @@ bool AvlTree<TYPE, KTYPE>::AVL_Update(KTYPE key, TYPE newF)
         return false;
 }    //  AVL_Retrieve
 
-/*	==================== AVL_Traverse ==================== 
+/*	==================== AVL_TraverseInOrder ====================
 	Process tree using inorder traversal. 
 	   Pre   process used to "visit" nodes during traversal 
 	   Post  all nodes processed in LNR (inorder) sequence 
@@ -729,14 +732,14 @@ bool AvlTree<TYPE, KTYPE>::AVL_Update(KTYPE key, TYPE newF)
 
 template<class TYPE, class KTYPE>
 void AvlTree<TYPE, KTYPE>
-::AVL_Traverse(void (*process)(TYPE dataProc))
+::AVL_TraverseInOrder(void (*process)(TYPE *dataProc))
 {
 //	Statements 
-    _traversal(process, tree);
+    _traversalInOrder(process, tree);
     return;
-}    // end AVL_Traverse
+}    // end AVL_TraverseInOrder
 
-/*	===================== _traversal ===================== 
+/*	===================== _traversalInOrder =====================
 	Traverse tree using inorder traversal. To process a
 	node, we use the function passed when traversal is called.
 	   Pre   tree has been created (may be null) 
@@ -745,18 +748,71 @@ void AvlTree<TYPE, KTYPE>
 
 template<class TYPE, class KTYPE>
 void AvlTree<TYPE, KTYPE>
-::_traversal(void(*process)(TYPE dataproc),
-             NODE<TYPE> *root)
+::_traversalInOrder(void(*process)(TYPE *dataproc),
+                    NODE<TYPE> *root)
 {
 //	Statements 
     if (root)
     {
-        _traversal(process, root->left);
-        process(root->data);
-        _traversal(process, root->right);
+        _traversalInOrder(process, root->left);
+        process(&root->data);
+        _traversalInOrder(process, root->right);
     } //  if
     return;
-}    //  _traversal
+}    //  _traversalInOrder
+
+
+/*	==================== AVL_TraverseBreadth ====================
+	Process tree using Breadth-First traversal.
+	   Pre   process used to "visit" nodes during traversal
+	   Post  all nodes processed in Breadth-First sequence
+*/
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>
+::AVL_TraverseBreadth(void (*process)(TYPE dataProc))
+{
+    //	Statements
+    _traversalBreadth(process, tree);
+    return;
+}    // end AVL_TraverseInOrder
+
+/*	===================== _traversalInOrder =====================
+	Traverse tree using inorder traversal. To process a
+	node, we use the function passed when traversal is called.
+	   Pre   tree has been created (may be null)
+	   Post  all nodes processed
+*/
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>
+::_traversalBreadth(void(*process)(TYPE dataproc), NODE<TYPE> *root)
+{
+    if (root == nullptr)
+        return;
+
+    queue<NODE<TYPE> *> q;
+    q.push(root);
+
+    int c = 0;
+    while (!q.empty())
+    {
+        c++;
+        NODE<TYPE> *node = q.front();
+        process(node->data);
+        q.pop();
+
+        if (node->left != nullptr)
+            q.push(node->left);
+
+        if (node->right != nullptr)
+            q.push(node->right);
+    }
+
+    cout << "BREADTH: " << c << endl;
+    cout << "COUNT: " << count << endl;
+}
+
 
 /*	=================== AVL_Empty ==================	
 	Returns true if tree is empty, false if any data.

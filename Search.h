@@ -9,7 +9,7 @@ class Search
 {
     void PrintRow(DATA _node, int _index);
 
-    void PrintTable(vector<DATA> data);
+    void PrintTable(vector<pair<DATA, int>> data);
 
     static int GetLevDist(string input, string candidate);
 
@@ -19,18 +19,21 @@ public:
     void LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(string));
 };
 
+bool myfunction(pair<DATA, int> i, pair<DATA, int> j)
+{ return (i.second < j.second); };
+
 void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(string))
 {
     while (true)
     {
         string query;
-        cout << "SEARCH THE HOGWARTS LIBRARY:       (Type '~E' to exit)" << endl;
+        cout << "SEARCH THE HARRY POTTER CHAPTERS:       (Type '~E' to exit)" << endl;
         cin >> query;
         system("CLS");
 
         if (query == "~E")
         {
-            cout << "Leaving the library..." << endl;
+            cout << "Leaving..." << endl;
             return;
         }
         query = RemoveSymbols(query);
@@ -44,31 +47,19 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(st
             DATA qData;
             qData.key = RemoveSymbols(query);
             vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(qData, Comparison);
-            vector<DATA> sorted;
             for (int i = 0; i < results.size(); i++)
             {
-                pair<DATA, int> best = make_pair(results[i].first, i);
-                for (int j = i + 1; j < results.size(); j++)
-                {
-                    if (results[j].first.key.empty())
-                    {
-                        continue;
-                    }
-                    if (results[j].second < best.second)
-                    {
-                        best = make_pair(results[j].first, j);
-                    }
-                }
-                results[best.second].first.key = "";
-                if (!best.first.key.empty())
-                    sorted.push_back(best.first);
+                cout << i + 1 << ". |" << results[i].first.key << "| " <</* results[i].second <<*/ endl;
             }
-            cout << "Top " << sorted.size() << " results for your search of " << query << endl;
-            PrintTable(sorted);
-//            for (int i = 0; i < sorted.size(); i++)
-//            {
-//                cout << i + 1 << ". |" << sorted[i].key << "|" << endl;
-//            }
+//            sort(results.begin(), results.end(), myfunction);
+            results = quickSort(results, 0, (int) results.size() - 1);
+
+            cout << "Top " << results.size() << " results for your search of " << query << endl;
+            PrintTable(results);
+            for (int i = 0; i < results.size(); i++)
+            {
+                cout << i + 1 << ". |" << results[i].first.key << "|   " << endl;
+            }
         }
     }
 }
@@ -76,14 +67,9 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(st
 
 int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Distance between two strings to find the closest result
 {
-    int i, j, l1, l2, t, track;
-    int dist[50][50];
-    //take the strings as input
-    char s1[] = "tutorials";
-    char s2[] = "point";
-    //stores the lenght of strings s1 and s2
-    l1 = input.size();
-    l2 = candidate.size();
+    int i, j, l1 = (int) input.size(), l2 = (int) candidate.size(), t, track;
+    int dist[input.size() + candidate.size()][input.size() + candidate.size()];
+
     for (i = 0; i <= l1; i++)
     {
         dist[0][i] = i;
@@ -96,7 +82,7 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
     {
         for (i = 1; i <= l2; i++)
         {
-            if (s1[i - 1] == s2[j - 1])
+            if (input[i - 1] == candidate[j - 1])
             {
                 track = 0;
             }
@@ -108,7 +94,6 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
             dist[i][j] = min(t, (dist[i - 1][j - 1] + track));
         }
     }
-//    cout << "The Levinstein distance is:" << dist[l2][l1] << endl;
     return dist[l2][l1];
 }
 
@@ -124,7 +109,7 @@ int Search::Comparison(DATA _current, DATA _old, int diff)
     return diff;
 }
 
-void Search::PrintTable(vector<DATA> data)
+void Search::PrintTable(vector<pair<DATA, int>> data)
 {
     double n = 1;
     //table header
@@ -137,7 +122,7 @@ void Search::PrintTable(vector<DATA> data)
     //Data
     for (int i = 0; i < data.size(); i++)
     {
-        PrintRow(data[i], i + 1);
+        PrintRow(data[i].first, i + 1);
     }
 }
 

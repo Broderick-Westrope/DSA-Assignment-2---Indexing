@@ -18,11 +18,6 @@ public:
     {};
 };
 
-bool operator<(const ARTICLE &n1, const ARTICLE &n2)
-{
-    return n1.freq < n2.freq;
-}
-
 class DATA //The Node's data
 {
 public:

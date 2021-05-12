@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/AVL_ADT.h
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/DATA.h
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Quicksort.h
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Search.h
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/main.cpp
+stdlib.h
+-
+iomanip
+-
+string
+-
+fstream
+-
+iostream
+-
+vector
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/vector
+algorithm
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/algorithm
+bits/stdc++.h
+-
+filesystem
+-
+queue
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/queue
+DATA.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/DATA.h
+Quicksort.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Quicksort.h
+AVL_ADT.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/AVL_ADT.h
+Search.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Search.h
+
