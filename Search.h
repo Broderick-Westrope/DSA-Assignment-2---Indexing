@@ -7,24 +7,40 @@
 
 class Search
 {
-    void PrintRow(DATA _node, int _index);
+    void PrintRow(DATA, int);
+
+
+    static int GetLevDist(string, string);
+
+public:
+    void LoopSearch(AvlTree<DATA, string> *, string (*)(string), string);
+
+    static int Compare_Lev(DATA, DATA);
+
+    void PrintTable(vector<DATA>);
+
+    void StrictSearch(string _query, AvlTree<DATA, string> *_tree);
+
+    static void ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps);
+
+    static int Compare_Contains(DATA _candidate, DATA _input);
+
+    static vector<int> KMPSearch(string _input, string _candidate);
 
     void PrintTable(vector<pair<DATA, int>> data);
 
-    static int GetLevDist(string input, string candidate);
+    void ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree);
 
-public:
-    void LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string));
-
-    static int Compare_Lev(DATA _candidate, DATA _input);
+    void LevSearch(DATA _qData, AvlTree<DATA, string> *_tree);
 };
 
-void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string))
+
+void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string), string _searchType)
 {
     while (true)
     {
         string query;
-        cout << "SEARCH THE HARRY POTTER CHAPTERS:       (Type '~E' to exit)" << endl;
+        cout << "SEARCH THE HARRY POTTER CHAPTERS:       (Type '~E' to exit searching)" << endl;
         getline(cin, query);
         system("CLS");
 
@@ -43,25 +59,20 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(strin
         {
             DATA qData;
             qData.key = FormatWord(query);
-            vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(qData, Compare_Lev);
-            for (int i = 0; i < results.size(); i++)
+            if (_searchType == "Strict")
             {
-                cout << i + 1 << ". |" << results[i].first.key << "| " << results[i].second << endl;
+                StrictSearch(query, _tree);
             }
-
-            results = quickSort(results, 0, (int) results.size() - 1);
-
-            cout << "Top " << results.size() << " results for your search of " << query;
-            if (results.front().first.key == query)
+            else if (_searchType == "Contains")
             {
-                cout << ", including an exact match!";
+                ContainsSearch(qData, _tree);
             }
-            cout << endl;
-            PrintTable(results);
-//            for (int i = 0; i < results.size(); i++)
-//            {
-//                cout << i + 1 << ". |" << results[i].first.key << "|   " << endl;
-//            }
+            else
+            {
+                if (_searchType != "Lev")
+                    cout << "ERROR: No valid search type was provided." << endl;
+                LevSearch(qData, _tree);
+            }
         }
 
         cout << endl << "Press Enter To Continue..." << endl;
@@ -70,6 +81,74 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(strin
     }
 }
 
+void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree) //strict
+{
+    string upperBound;
+    char lastChar = static_cast<char>(_query[_query.size() - 1] + 1);
+    for (int i = 0; i < _query.size() - 1; i++)
+    {
+        upperBound += _query[i];
+    }
+    upperBound += lastChar;
+    vector<DATA> results = _tree->AVL_GetStrictResults(_query, upperBound);
+
+    if (results.empty())
+    {
+        cout << "There were no results for your search of " << _query << ". Try something else." << endl;
+    }
+    else
+    {
+        cout << "Top " << results.size() << " results for your search of " << _query;
+        if (results.front().key == _query)
+        {
+            cout << ", including an exact match!";
+        }
+        cout << endl;
+        PrintTable(results);
+    }
+}
+
+void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree) //contains
+{
+    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_Contains);
+    quickSort(results, 0, results.size() - 1);
+
+    if (results.empty())
+    {
+        cout << "There were no results for your search of " << _qData.key << ". Try something else." << endl;
+    }
+    else
+    {
+        cout << "Top " << results.size() << " results for your search of " << _qData.key;
+        if (results.front().first.key == _qData.key)
+        {
+            cout << ", including an exact match!";
+        }
+        cout << endl;
+        PrintTable(results);
+    }
+}
+
+void Search::LevSearch(DATA _qData, AvlTree<DATA, string> *_tree) //levenshtein
+{
+    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_Lev);
+    quickSort(results, 0, results.size() - 1);
+
+    if (results.empty())
+    {
+        cout << "There were no results for your search of " << _qData.key << ". Try something else." << endl;
+    }
+    else
+    {
+        cout << "Top " << results.size() << " results for your search of " << _qData.key;
+        if (results.front().first.key == _qData.key)
+        {
+            cout << ", including an exact match!";
+        }
+        cout << endl;
+        PrintTable(results);
+    }
+}
 
 int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Distance between two strings to find the closest result
 {
@@ -103,10 +182,9 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
     return dist[l2][l1];
 }
 
-void computeLPSArray(const string &_candidate, int _C, vector<int> &_lps);
 
 // Prints occurrences of _candidate[] in _input[]
-vector<int> KMPSearch(string _input, string _candidate)
+vector<int> Search::KMPSearch(string _input, string _candidate)
 {
     vector<int> indices;
 
@@ -118,13 +196,12 @@ vector<int> KMPSearch(string _input, string _candidate)
     vector<int> lps(I);
 
     // Preprocess the pattern (calculate lps[] array)
-    computeLPSArray(_input, I, lps);
+    ComputeLPSArray(_input, I, lps);
 
     int i = 0; // index for _candidate[]
     int j = 0; // index for _input[]
     while (i < C)
     {
-        printf("MARK\n");
         if (_input[j] == _candidate[i])
         {
             j++;
@@ -134,7 +211,7 @@ vector<int> KMPSearch(string _input, string _candidate)
         if (j == I)
         {
             indices.push_back(i - j);
-            printf("Found pattern at index %d ", i - j);
+//            printf("Found pattern at index %d ", i - j);
             j = lps[j - 1];
         }
         else if (i < C && _input[j] != _candidate[i]) // mismatch after j matches
@@ -152,7 +229,7 @@ vector<int> KMPSearch(string _input, string _candidate)
 }
 
 // Fills lps[] for given patttern pat[0..M-1]
-void computeLPSArray(const string &_candidate, int C, vector<int> &_lps)
+void Search::ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps)
 {
     // length of the previous longest prefix suffix
     int len = 0;
@@ -190,7 +267,7 @@ void computeLPSArray(const string &_candidate, int C, vector<int> &_lps)
     }
 }
 
-int Search::Compare_Lev(DATA _candidate, DATA _input)
+int Search::Compare_Contains(DATA _candidate, DATA _input)
 {
     int score;
 
@@ -201,24 +278,48 @@ int Search::Compare_Lev(DATA _candidate, DATA _input)
 
     vector<int> indices = KMPSearch(_input.key, _candidate.key);
 
+    score = (int) indices.size();
+
     if (!indices.empty())
     {
-        if (indices[0] == 0)//(_candidate.key.rfind(_input.key, 0) == 0) //If the candidate's key starts with the input's key
+        if (indices[0] == 0) //If the candidate's key starts with the input's key
         {
-            score = 50 + ((int) indices.size() - 1);
+            score = 10 + ((int) indices.size() - 1);
         }
-        else
-        {
-            score = 20 + (int) indices.size();
-        }
-    }
-    else
-    {
-        score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
     }
 
+    return score;
+}
+
+int Search::Compare_Lev(DATA _candidate, DATA _input)
+{
+    int score;
+
+    if (_candidate.key == _input.key)
+    {
+        return 100;
+    }
+
+    score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
     score -= GetLevDist(_candidate.key, _input.key);
     return score;
+}
+
+void Search::PrintTable(vector<DATA> data)
+{
+    double n = 1;
+    //table header
+    cout << setfill('$') << setw(52) << "$" << endl;
+    cout << setfill(' ') << fixed;
+    cout << setw(8) << "RESULT" << setw(15) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setfill('*') << setw(52) << "*" << endl;
+    cout << setfill(' ') << fixed;
+
+    //Data
+    for (int i = 0; i < data.size(); i++)
+    {
+        PrintRow(data[i], i + 1);
+    }
 }
 
 void Search::PrintTable(vector<pair<DATA, int>> data)
@@ -227,7 +328,7 @@ void Search::PrintTable(vector<pair<DATA, int>> data)
     //table header
     cout << setfill('$') << setw(52) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(16) << "WORD" << setw(12) << "FILE" << setw(12) << "FREQUENCY" << endl;
+    cout << setw(8) << "RESULT" << setw(15) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
     cout << setfill('*') << setw(52) << "*" << endl;
     cout << setfill(' ') << fixed;
 
@@ -242,12 +343,15 @@ void Search::PrintRow(DATA _node, int _index)
 {
     if (_node.data.empty())
         cout << "ERROR: No data to PrintRow." << endl;
+    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(15) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
+
     for (int i = 0; i < _node.data.size(); i++)
     {
         string ch = _node.data[i].path.substr(9, 7);
         string result = to_string(_index) + "." + to_string(i + 1);
-        cout << setprecision(0) << setw(8) << result << setw(16) << _node.key << setprecision(7) << setw(12) << ch << setw(12) << _node.GetFrequency(WORD_COUNT) << endl;
+        cout << setprecision(0) << setw(8) << result << setw(15) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
     }
+
     cout << setfill('-') << setw(52) << "-" << endl;
     cout << setfill(' ') << fixed;
 }

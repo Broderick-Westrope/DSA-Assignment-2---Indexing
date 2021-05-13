@@ -88,6 +88,15 @@ public:
     vector<pair<TYPE, int>> AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE, TYPE));
 
     void AVL_TraverseBreadth(void (*process)(TYPE));
+
+
+    vector<pair<TYPE, int>> AVL_ScanForResults(int (*process)(TYPE, TYPE), TYPE _target);
+
+    void _scanForResults(int (*process)(TYPE, TYPE), NODE<TYPE> *root, TYPE _target, vector<pair<TYPE, int>> &_v);
+
+    vector<TYPE> AVL_GetStrictResults(KTYPE bound1, KTYPE bound2);
+
+    void _getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, vector<TYPE> &_v);
 }; // class AvlTree
 
 /*	=================== Constructor ===================	
@@ -758,6 +767,27 @@ void AvlTree<TYPE, KTYPE>
     return;
 }    //  _traversalInOrder
 
+template<class TYPE, class KTYPE>
+vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_ScanForResults(int(*process)(TYPE n1, TYPE n2), TYPE _target)
+{
+    vector<pair<TYPE, int>> _v;
+    _scanForResults(process, tree, _target, _v);
+    return _v;
+}
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>::_scanForResults(int(*process)(TYPE n1, TYPE n2), NODE<TYPE> *root, TYPE _target, vector<pair<TYPE, int>> &_v)
+{
+//	Statements
+    if (root)
+    {
+        _scanForResults(process, root->left, _target, _v);
+        int d = process(root->data, _target);
+        _v.push_back(make_pair(root->data, d));
+        _scanForResults(process, root->right, _target, _v);
+    } //  if
+}    //  _traversalInOrder
+
 
 /*	==================== AVL_TraverseBreadth ====================
 	Process tree using Breadth-First traversal.
@@ -956,55 +986,6 @@ void AvlTree<TYPE, KTYPE>::_print(NODE<TYPE> *root,
 
 } /* AVL_Print */
 
-//template<class TYPE, class KTYPE>
-//vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetNodesContaining(TYPE _node, int (*comparison)(TYPE n1, TYPE n2, int diff))
-//{
-//    // Initialize minimum difference
-//    int minDiff = INT_MAX;
-//    vector<pair<TYPE, int>> minDiffNodes;
-//
-//    // Find value of minDiffNodes (Closest key
-//    // in tree with k)
-//    _closestNode(tree, _node, minDiff, minDiffNodes, comparison);
-//    reverse(minDiffNodes.begin(), minDiffNodes.end());
-//
-//    return minDiffNodes;
-//}
-//
-//template<class TYPE, class KTYPE>
-//void AvlTree<TYPE, KTYPE>::_containingNodes(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE n1, TYPE n2, int diff))
-//{
-//    if (ptr == NULL)
-//    {
-//        printf("NULL REACHED\n");
-//        return;
-//    }
-//
-//    int diff = comparison(ptr->data, _node, diff);
-//
-//    // If the target itself is present (no difference in keys)
-//    if (diff == 0)
-//    {
-//        minDiffNodes.push_back(make_pair(ptr->data, diff));
-//        return;
-//    }
-//
-//    // update minDiff and minDiffNodes by checking
-//    // current node value
-//    if (diff <= minDiff)
-//    {
-//        minDiff = diff;
-//    }
-//    minDiffNodes.push_back(make_pair(ptr->data, diff)); //! move to inside the above for loop if you want to only get prograssive results (less results but more accurate when not looking at occurences)
-//
-//    // if the target is less than ptr->key then move in
-//    // left subtree else in right subtree
-//    if (_node.key < ptr->data.key)
-//        _closestNode(ptr->left, _node, minDiff, minDiffNodes, comparison);
-//    else
-//        _closestNode(ptr->right, _node, minDiff, minDiffNodes, comparison);
-//}
-
 template<class TYPE, class KTYPE>
 vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE n1, TYPE n2))
 {
@@ -1053,4 +1034,39 @@ void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDif
         _closestNode(ptr->left, _node, minDiff, minDiffNodes, comparison);
     else
         _closestNode(ptr->right, _node, minDiff, minDiffNodes, comparison);
+}
+
+template<class TYPE, class KTYPE>
+vector<TYPE> AvlTree<TYPE, KTYPE>::AVL_GetStrictResults(KTYPE bound1, KTYPE bound2)
+{
+    vector<TYPE> v;
+    _getNodesInRange(tree, bound1, bound2, v);
+    return v;
+}
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, vector<TYPE> &_v)
+{
+    /* base case */
+    if (!root)
+        return;
+
+    /* Since the desired o/p is sorted,
+        recurse for left subtree first
+        If root->data is greater than bound1,
+        then only we can get o/p keys
+        in left subtree */
+    if (bound1 < root->data.key)
+        _getNodesInRange(root->left, bound1, bound2, _v);
+
+    /* if root's data lies in range,
+    then prints root's data */
+    if (bound1 <= root->data.key && bound2 >= root->data.key)
+        _v.push_back(root->data);
+
+    /* If root->data is smaller than bound2,
+        then only we can get o/p keys
+        in right subtree */
+    if (bound2 > root->data.key)
+        _getNodesInRange(root->right, bound1, bound2, _v);
 }

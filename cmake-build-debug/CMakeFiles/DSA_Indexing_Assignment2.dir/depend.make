@@ -3,6 +3,7 @@
 
 CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../AVL_ADT.h
 CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../DATA.h
+CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../FileOperations.h
 CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../Quicksort.h
 CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../Search.h
 CMakeFiles/DSA_Indexing_Assignment2.dir/main.cpp.obj: ../main.cpp
