@@ -14,12 +14,12 @@ class Search
     static int GetLevDist(string input, string candidate);
 
 public:
-    static int Comparison(DATA _current, DATA _old, int diff);
+    void LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string));
 
-    void LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(string));
+    static int Compare_Lev(DATA _candidate, DATA _input);
 };
 
-void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(string))
+void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string))
 {
     while (true)
     {
@@ -33,7 +33,7 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(st
             cout << "Leaving..." << endl;
             return;
         }
-        query = RemoveSymbols(query);
+        query = FormatWord(query);
         if (query.empty())
         {
             cout << "No valid input was entered, be sure to take a look at some of our great articles and only use letters in your search!" << endl;
@@ -42,8 +42,8 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*RemoveSymbols)(st
         else
         {
             DATA qData;
-            qData.key = RemoveSymbols(query);
-            vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(qData, Comparison);
+            qData.key = FormatWord(query);
+            vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(qData, Compare_Lev);
             for (int i = 0; i < results.size(); i++)
             {
                 cout << i + 1 << ". |" << results[i].first.key << "| " << results[i].second << endl;
@@ -103,116 +103,122 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
     return dist[l2][l1];
 }
 
-//Function which parses out a string based on the delimiter of choice. The results are stored back into a vector which is passed in by memory the address
-void GetTokens(string str, vector<string> &tokenVector, char token)
+void computeLPSArray(const string &_candidate, int _C, vector<int> &_lps);
+
+// Prints occurrences of _candidate[] in _input[]
+vector<int> KMPSearch(string _input, string _candidate)
 {
-    //Skips the delimiters at the beginning of the string
-    int lastPosition = str.find_first_not_of(token, 0);
-    //Find the first non delimiter
-    int position = str.find_first_of(token, lastPosition);
+    vector<int> indices;
 
-    //While loop which iterates through a string to subract tokens
-    while (string::npos != position || string::npos != lastPosition)
+    int I = (int) _input.size();
+    int C = (int) _candidate.size();
+
+    // create lps[] that will hold the longest prefix suffix
+    // values for pattern
+    vector<int> lps(I);
+
+    // Preprocess the pattern (calculate lps[] array)
+    computeLPSArray(_input, I, lps);
+
+    int i = 0; // index for _candidate[]
+    int j = 0; // index for _input[]
+    while (i < C)
     {
-        //Adds found token to the vector
-        tokenVector.push_back(str.substr(lastPosition, position - lastPosition));
-        //Finds the next delimiter
-        lastPosition = str.find_first_not_of(token, position);
-        //Finds the next non delimiter
-        position = str.find_first_of(token, lastPosition);
-    }
-}
-
-//Complex searching algorithm to handle multi word searches
-void complexSearch(string _input, string _candidate)
-{
-    vector<string> searchResults;
-    vector<string> formattedText;
-
-    //This uses the strstr function to find if an occurance of our search string has occurred in the original string
-    const char *ptr = strstr(_candidate.c_str(), _input.c_str()); //!used to be OriginalNotes
-    //A match is found if the pointer returned by the strstr function is not NULL
-    if (ptr != NULL)
-    {
-        //Create a new string by using strdup to duplicate the string starting at the position an occurance was found
-        string str = strdup(ptr);
-        string searchString = _input;
-        int start = 0;
-        string final;
-        bool finished = false;
-        //Round up the last word by finding the next whitespace
-        while (start < searchString.size() - 1 || !finished && start < str.size())
+        printf("MARK\n");
+        if (_input[j] == _candidate[i])
         {
-            //Make sure we don’t go out of bounds while itterating the string
-            if (start > searchString.size() - 1)
-            {
-                //If we find anything, but a space, add the character to our last word
-                if (str[start] != ' ')
-                {
-                    //Add the character to the final word and increase the position
-                    final = final + str[start];
-                    start++;
-                }
-                    //If a space was found, it means that the word has been rounded up
-                else
-                {
-                    //Set a boolean so our loop will break
-                    finished = true;
-                }
-            }
-                //This is an edge case for if the word to be rounded is the last word in the original string
+            j++;
+            i++;
+        }
+
+        if (j == I)
+        {
+            indices.push_back(i - j);
+            printf("Found pattern at index %d ", i - j);
+            j = lps[j - 1];
+        }
+        else if (i < C && _input[j] != _candidate[i]) // mismatch after j matches
+        {
+            // Do not match lps[0..lps[j-1]] characters,
+            // they will match anyway
+            if (j != 0)
+                j = lps[j - 1];
             else
-            {
-                //Add the character to the final word and increase the position
-                final = final + str[start];
-                start++;
-            }
+                i = i + 1;
         }
-        //Inilize a vector to store tokenized strings into
-        vector<string> tokens;
-        //Call the tokenizing function and separate the words by space
-        GetTokens(final, tokens, ' ');
-        int foundPosition;
-        //Look for the occurance of the first search word in vector of original words
-        for (int j = 0; j < formattedText.size(); j++)
+    }
+
+    return indices;
+}
+
+// Fills lps[] for given patttern pat[0..M-1]
+void computeLPSArray(const string &_candidate, int C, vector<int> &_lps)
+{
+    // length of the previous longest prefix suffix
+    int len = 0;
+
+    _lps[0] = 0; // lps[0] is always 0
+
+    // the loop calculates lps[i] for i = 1 to M-1
+    int i = 1;
+    while (i < C)
+    {
+        if (_candidate[i] == _candidate[len])
         {
-            const char *ptr = strstr(formattedText[j].c_str(), tokens[0].c_str());
-            //Found an occurance
-            if (ptr != NULL)
+            len++;
+            _lps[i] = len;
+            i++;
+        }
+        else // (pat[i] != pat[len])
+        {
+            // This is tricky. Consider the example.
+            // AAACAAAA and i = 7. The idea is similar
+            // to search step.
+            if (len != 0)
             {
-                //If we find a match, we need to start at that position and see if the next words in the search vector match the corresponding order of words in the original word vector
-                foundPosition = j;
-                int count = 0;
-                //Loop through the vector of tokens
-                for (int i = 0; i < tokens.size(); i++)
-                {
-                    //If the arrays don’t match, then break from the loop
-                    if (tokens[i] != formattedText[foundPosition])
-                    {
-                        break;
-                    }
-                    foundPosition++;
-                    count++;
-                }
-                //If all occurance of the search string occurred in correct order, then we are done
-                if (count == tokens.size())
-                {
-                    searchResults.push_back(final);
-                }
+                len = _lps[len - 1];
+
+                // Also, note that we do not increment
+                // i here
+            }
+            else // if (len == 0)
+            {
+                _lps[i] = 0;
+                i++;
             }
         }
     }
 }
 
-int Search::Comparison(DATA _current, DATA _old, int diff)
+int Search::Compare_Lev(DATA _candidate, DATA _input)
 {
-    if (_current.key == _old.key)
+    int score;
+
+    if (_candidate.key == _input.key)
     {
-        return diff;
+        return 100;
     }
 
-    diff = GetLevDist(_current.key, _old.key);
-    return diff;
+    vector<int> indices = KMPSearch(_input.key, _candidate.key);
+
+    if (!indices.empty())
+    {
+        if (indices[0] == 0)//(_candidate.key.rfind(_input.key, 0) == 0) //If the candidate's key starts with the input's key
+        {
+            score = 50 + ((int) indices.size() - 1);
+        }
+        else
+        {
+            score = 20 + (int) indices.size();
+        }
+    }
+    else
+    {
+        score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
+    }
+
+    score -= GetLevDist(_candidate.key, _input.key);
+    return score;
 }
 
 void Search::PrintTable(vector<pair<DATA, int>> data)

@@ -20,7 +20,7 @@ int partition(vector<pair<DATA, int>> &_v, int low, int high)
 
     for (int j = low; j <= high - 1; j++)
     {
-        if (_v[j].second <= pivot.second)
+        if (_v[j].second >= pivot.second)
         {
             i++;
             swap(&_v[i], &_v[j]);

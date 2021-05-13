@@ -57,7 +57,7 @@ private:
 //  	The following function is used for debugging.
     void _print(NODE<TYPE> *root, int level);
 
-    void _closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE, TYPE, int));
+    void _closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE, TYPE));
 
     void _traversalBreadth(void (*process)(TYPE), NODE<TYPE> *root);
 
@@ -74,7 +74,7 @@ public:
 
     void AVL_TraverseInOrder(void (*process)(TYPE *dataProc)); //in-order
 
-    bool AVL_Update(KTYPE key, TYPE newF);
+    bool AVL_Update(KTYPE key, TYPE newData);
 
     bool AVL_Empty(void);
 
@@ -85,7 +85,7 @@ public:
 //      The following function is used for debugging.
     void AVL_Print(void);
 
-    vector<pair<TYPE, int>> AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE, TYPE, int));
+    vector<pair<TYPE, int>> AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE, TYPE));
 
     void AVL_TraverseBreadth(void (*process)(TYPE));
 }; // class AvlTree
@@ -705,24 +705,21 @@ NODE<TYPE> *AvlTree<TYPE, KTYPE>::_retrieve(KTYPE key, NODE<TYPE> *root)
 
 
 template<class TYPE, class KTYPE>
-bool AvlTree<TYPE, KTYPE>::AVL_Update(KTYPE key, TYPE newF)
+bool AvlTree<TYPE, KTYPE>::AVL_Update(KTYPE key, TYPE newData)
 {
-//	Local Definitions
-    NODE<TYPE> *node;
-
 //	Statements
     if (!tree)
         return false;
 
-    node = _retrieve(key, tree);
+    NODE<TYPE> *node = _retrieve(key, tree);
     if (node)
     {
-        node->data = newF;
+        node->data = newData;
         return true;
     } // if found
     else
         return false;
-}    //  AVL_Retrieve
+}
 
 /*	==================== AVL_TraverseInOrder ====================
 	Process tree using inorder traversal. 
@@ -1009,7 +1006,7 @@ void AvlTree<TYPE, KTYPE>::_print(NODE<TYPE> *root,
 //}
 
 template<class TYPE, class KTYPE>
-vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE n1, TYPE n2, int diff))
+vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, int (*comparison)(TYPE n1, TYPE n2))
 {
     // Initialize minimum difference
     int minDiff = INT_MAX;
@@ -1024,7 +1021,7 @@ vector<pair<TYPE, int>> AvlTree<TYPE, KTYPE>::AVL_GetClosestNodes(TYPE _node, in
 }
 
 template<class TYPE, class KTYPE>
-void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE n1, TYPE n2, int diff))
+void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE n1, TYPE n2))
 {
     if (ptr == NULL)
     {
@@ -1032,7 +1029,7 @@ void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDif
         return;
     }
 
-    int diff = comparison(ptr->data, _node, diff);
+    int diff = comparison(ptr->data, _node);
 
     // If the target itself is present (no difference in keys)
     if (diff == 0)

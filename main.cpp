@@ -39,12 +39,35 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree);
 
 int main()
 {
+    //region - Title
+    cout << "                                         _ __\n"
+            "         ___                             | '  \\\n"
+            "    ___  \\ /  ___         ,'\\_           | .-. \\        /|\n"
+            "    \\ /  | |,'__ \\  ,'\\_  |   \\          | | | |      ,' |_   /|\n"
+            "  _ | |  | |\\/  \\ \\ |   \\ | |\\_|    _    | |_| |   _ '-. .-',' |_   _\n"
+            " // | |  | |____| | | |\\_|| |__    //    |     | ,'_`. | | '-. .-',' `. ,'\\_\n"
+            " \\\\_| |_,' .-, _  | | |   | |\\ \\  //    .| |\\_/ | / \\ || |   | | / |\\  \\|   \\\n"
+            "  `-. .-'| |/ / | | | |   | | \\ \\//     |  |    | | | || |   | | | |_\\ || |\\_|\n"
+            "    | |  | || \\_| | | |   /_\\  \\ /      | |`    | | | || |   | | | .---'| |\n"
+            "    | |  | |\\___,_\\ /_\\ _      //       | |     | \\_/ || |   | | | |  /\\| |\n"
+            "    /_\\  | |           //_____//       .||`      `._,' | |   | | \\ `-' /| |\n"
+            "         /_\\           `------'        \\ |   AND        `.\\  | |  `._,' /_\\\n"
+            "                                        \\|       THE          `.\\\n"
+            "                                             _  _  _  _  __ _  __ _ /_\n"
+            "                                            (_`/ \\|_)/ '|_ |_)|_ |_)(_\n"
+            "                                            ._)\\_/| \\\\_,|__| \\|__| \\ _)\n"
+            "                                                            _ ___ _      _\n"
+            "                                                           (_` | / \\|\\ ||__\n"
+            "                                                           ._) | \\_/| \\||___\n";
+    //endregion
+
     AvlTree<DATA, string> tree;
     if (!tree.AVL_Empty())
         cout << "ERROR: New tree wasn't empty." << endl;
 
-    int count = LoadNodes("..\\save.txt", &tree);
-//    int count = ScanBook(&tree);
+//    int count = LoadNodes("..\\save.txt", &tree);
+    int count = ScanBook(&tree);
+    string s;
     cout << "Gathered " << to_string(count) << " words." << endl;
     cout << "AVL Tree has " << tree.AVL_Count() << " words." << endl;
 
@@ -63,7 +86,8 @@ int main()
     Search search;
     search.LoopSearch(&tree, FormatWord);
 
-//    PrintTable(&tree);
+//    tree.AVL_Print();
+    //    PrintTable(&tree);
 //    cout << endl;
     printf("BYE!\n");
     return 0;
@@ -71,7 +95,7 @@ int main()
 
 string FormatWord(string _w)
 {
-    std::transform(_w.begin(), _w.end(), _w.begin(), [](unsigned char c) { return std::tolower(c); }); //Remove any uppercase first letters
+    transform(_w.begin(), _w.end(), _w.begin(), [](unsigned char c) { return tolower(c); }); //Remove any uppercase first letters
 
     for (int i = 0; i < _w.size(); i++)
     {
@@ -113,7 +137,6 @@ int ScanChapter(const string &_file, AvlTree<DATA, string> *_tree)
     }
 
     int wordPos = 1;
-    int totalWordCount = 0;
     DATA newData;
 
     while (file >> word)
@@ -171,7 +194,7 @@ void PrintTable(AvlTree<DATA, string> *_tree)
     //table header
     cout << setfill('$') << setw(3 * colWidth) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(colWidth) << "WORD" << setw(colWidth) << "FREQUENCY" << endl;
+    cout << setw(colWidth) << "WORD" << setw(colWidth) << "FREQUENCY (per 1000 words)" << endl;
     cout << setfill('*') << setw(3 * colWidth) << "*" << endl;
     cout << setfill(' ') << fixed;
 
