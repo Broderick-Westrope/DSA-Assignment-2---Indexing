@@ -17,6 +17,8 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree);
 
 string FormatWord(string _w);
 
+string FormatFileName(string);
+
 void GetArticle(string str, string &path, vector<int> &positions, char token);
 
 int FindArticle(vector<ARTICLE> _v, const string &_path);
@@ -24,7 +26,7 @@ int FindArticle(vector<ARTICLE> _v, const string &_path);
 int ScanBook(AvlTree<DATA, string> *_tree)
 {
     int wordCount = 0;
-    for (int i = 1; i <= 6; i++)
+    for (int i = 1; i <= 17; i++)
     {
         wordCount += ScanChapter("..\\texts\\CH" + to_string(i) + ".txt", _tree);
     }
@@ -175,7 +177,7 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
 void ClearSaves()
 {
     ofstream ofs;
-    ofs.open("..\\save.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.open(SAVE_FILE, std::ofstream::out | std::ofstream::trunc);
     ofs.close();
 }
 
@@ -185,13 +187,8 @@ string FormatWord(string _w)
 
     for (int i = 0; i < _w.size(); i++)
     {
-        // Finding the character whose
-        // ASCII value fall under this
-        // range
-        if ((_w[i] < 'A' || _w[i] > 'Z' && _w[i] < 'a' || _w[i] > 'z') && (_w[i] != '\'') && (_w[i] != ' '))
+        if ((_w[i] < 'a' || _w[i] > 'z') && (_w[i] != ' '))// && ((_w[i] != '-') && i <= 1 && i >= _w.size() - 3))
         {
-            // erase function to erase
-            // the character
             _w.erase(i, 1);
             i--;
         }
@@ -224,6 +221,21 @@ void GetArticle(string str, string &path, vector<int> &positions, char token)
         //Finds the next non delimiter
         position = str.find_first_of(token, lastPosition);
     }
+}
+
+string FormatFileName(string _fn)
+{
+    for (int i = 0; i < _fn.size(); i++)
+    {
+        if (_fn[i] == '/' || _fn[i] == '\\' || _fn[i] == '?' || _fn[i] == '%' || _fn[i] == '*' || _fn[i] == ':' || _fn[i] == '|' || _fn[i] == '"' || _fn[i] == '<' || _fn[i] == '>' || _fn[i] == '.' ||
+            _fn[i] == ',' || _fn[i] == ';' || _fn[i] == '=' || _fn[i] == ' ')
+        {
+            _fn.erase(i, 1);
+            i--;
+        }
+    }
+
+    return _fn;
 }
 
 

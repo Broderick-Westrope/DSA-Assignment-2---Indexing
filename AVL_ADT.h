@@ -1061,7 +1061,7 @@ void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYP
 
     /* if root's data lies in range,
     then prints root's data */
-    if (bound1 <= root->data.key && bound2 >= root->data.key)
+    if (bound1 <= root->data.key && bound2 > root->data.key)
         _v.push_back(root->data);
 
     /* If root->data is smaller than bound2,

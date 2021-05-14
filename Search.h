@@ -32,6 +32,8 @@ public:
     void ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree);
 
     void LevSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+
+    void DictionaryStartingWith(AvlTree<DATA, string> *_tree);
 };
 
 
@@ -75,6 +77,38 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(strin
             }
         }
 
+        cin.ignore();
+        cout << endl << "Press Enter To Continue..." << endl;
+        getchar();
+        system("CLS");
+    }
+}
+
+void Search::DictionaryStartingWith(AvlTree<DATA, string> *_tree)
+{
+    while (true)
+    {
+        char query;
+        cout << "WHAT LETTER OF THE DICTIONARY WOULD YOU LIKE TO PRINT?       (Type '~' to exit searching)" << endl;
+        cin >> query;
+        system("CLS");
+
+        if (query == '~')
+        {
+            cout << "Leaving..." << endl;
+            return;
+        }
+        if (!isalpha(query))
+        {
+            cout << "No valid input was entered, be sure to only enter a single letter!" << endl;
+            continue;
+        }
+        else
+        {
+            StrictSearch(string(1, query), _tree);
+        }
+
+        cin.ignore();
         cout << endl << "Press Enter To Continue..." << endl;
         getchar();
         system("CLS");
@@ -85,16 +119,19 @@ void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree) //strict
 {
     string upperBound;
     char lastChar = static_cast<char>(_query[_query.size() - 1] + 1);
-    for (int i = 0; i < _query.size() - 1; i++)
+    if (_query.size() > 1)
     {
-        upperBound += _query[i];
+        for (int i = 0; i < _query.size() - 1; i++)
+        {
+            upperBound += _query[i];
+        }
     }
     upperBound += lastChar;
     vector<DATA> results = _tree->AVL_GetStrictResults(_query, upperBound);
 
     if (results.empty())
     {
-        cout << "There were no results for your search of " << _query << ". Try something else." << endl;
+        cout << "There were no results for your search of " << _query << ". Make sure you have scanned a dictionary or article and try again." << endl;
     }
     else
     {
@@ -115,7 +152,7 @@ void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree) //contain
 
     if (results.empty())
     {
-        cout << "There were no results for your search of " << _qData.key << ". Try something else." << endl;
+        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
     }
     else
     {
@@ -136,7 +173,7 @@ void Search::LevSearch(DATA _qData, AvlTree<DATA, string> *_tree) //levenshtein
 
     if (results.empty())
     {
-        cout << "There were no results for your search of " << _qData.key << ". Try something else." << endl;
+        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
     }
     else
     {
@@ -181,7 +218,6 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
     }
     return dist[l2][l1];
 }
-
 
 // Prints occurrences of _candidate[] in _input[]
 vector<int> Search::KMPSearch(string _input, string _candidate)
@@ -309,10 +345,10 @@ void Search::PrintTable(vector<DATA> data)
 {
     double n = 1;
     //table header
-    cout << setfill('$') << setw(52) << "$" << endl;
+    cout << setfill('$') << setw(60) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(15) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(52) << "*" << endl;
+    cout << setw(8) << "RESULT" << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setfill('*') << setw(60) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
@@ -326,10 +362,10 @@ void Search::PrintTable(vector<pair<DATA, int>> data)
 {
     double n = 1;
     //table header
-    cout << setfill('$') << setw(52) << "$" << endl;
+    cout << setfill('$') << setw(60) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(15) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(52) << "*" << endl;
+    cout << setw(8) << "RESULT" << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setfill('*') << setw(60) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
@@ -343,16 +379,16 @@ void Search::PrintRow(DATA _node, int _index)
 {
     if (_node.data.empty())
         cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(15) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(18) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
 
     for (int i = 0; i < _node.data.size(); i++)
     {
         string ch = _node.data[i].path.substr(9, 7);
         string result = to_string(_index) + "." + to_string(i + 1);
-        cout << setprecision(0) << setw(8) << result << setw(15) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
+        cout << setprecision(0) << setw(8) << result << setw(18) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
     }
 
-    cout << setfill('-') << setw(52) << "-" << endl;
+    cout << setfill('-') << setw(60) << "-" << endl;
     cout << setfill(' ') << fixed;
 }
 

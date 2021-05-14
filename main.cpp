@@ -27,7 +27,6 @@ void PrintTable(AvlTree<DATA, string> *_tree);
 
 int Menu(AvlTree<DATA, string> *_tree);
 
-string FormatFileName(string);
 
 int main()
 {
@@ -111,57 +110,76 @@ int Menu(AvlTree<DATA, string> *_tree)
                 cin >> input;
                 input = FormatFileName(input);
                 if (input == "harryPotter")
-                    count = ScanBook(_tree);
+                { count = ScanBook(_tree); }
                 else
-                {
-                    count = ScanChapter("..\\" + input + ".txt", _tree);
-                }
+                { count = ScanChapter("..\\" + input + ".txt", _tree); }
                 break;
 
             case 3: //Save the dictionary
-                system("CLS");
-                cout << "What file would you like to save to? (eg. 'saveFile'. Only write the name of the file)" << endl;
-                cin >> input;
-                input = FormatFileName(input);
-                SAVE_FILE = "..\\" + input + ".txt";
-                ClearSaves();
-                _tree->AVL_TraverseBreadth(SaveNode);
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                {
+                    system("CLS");
+                    cout << "What file would you like to save to? (eg. 'saveFile'. Only write the name of the file)" << endl;
+                    cin >> input;
+                    input = FormatFileName(input);
+                    SAVE_FILE = "..\\" + input + ".txt";
+                    ClearSaves();
+                    _tree->AVL_TraverseBreadth(SaveNode);
+                }
                 break;
 
             case 4: //Print the dictionary
-                system("CLS");
-                cout << "Do you want to print all the positions? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
-                cin >> input;
-                PRINT_POS = (input == "Y" || input == "y") ? true : false;
-                PrintTable(_tree);
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                {
+                    system("CLS");
+                    cout << "Do you want to print all the positions? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
+                    cin >> input;
+                    PRINT_POS = (input == "Y" || input == "y") ? true : false;
+                    PrintTable(_tree);
+                }
                 break;
 
-            case 5:
-
+            case 5: //Print dictionary starting with a letter
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                { search.DictionaryStartingWith(_tree); }
                 break;
 
             case 6: //Print the tree data
-                _tree->AVL_Print();
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                { _tree->AVL_Print(); }
                 break;
 
             case 7: //Search for a word
-                system("CLS");
-                cout << "What kind of search do you want to do?\n"
-                        " -[1]- Strict (Results are words/phrases that start with your search query)\n"
-                        " -[2]- Contains (Results are words/phrases that contain your search query)\n"
-                        " -[3]- Levenshtein (Results are all words passed to find the closest to your\n"
-                        "       query. Sorted based on their Levenshtein distance from the query)" << endl;
-                cin >> input;
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                {
+                    system("CLS");
+                    cout << "What kind of search do you want to do?\n"
+                            " -[1]- Strict (Results are words/phrases that start with your search query)\n"
+                            " -[2]- Contains (Results are words/phrases that contain your search query)\n"
+                            " -[3]- Levenshtein (Results are all words passed to find the closest to your\n"
+                            "       query. Sorted based on their Levenshtein distance from the query)" << endl;
+                    cin >> input;
 
-                if (input == "1")
-                    searchType = "Strict";
-                else if (input == "2")
-                    searchType = "Contains";
-                else if (input != "3")
-                    cout << "Invalid input. I'll do a strict search for you" << endl;
+                    if (input == "1")
+                        searchType = "Strict";
+                    else if (input == "2")
+                        searchType = "Contains";
+                    else if (input != "3")
+                        cout << "Invalid input. I'll do a strict search for you" << endl;
 
-                cin.ignore();
-                search.LoopSearch(_tree, FormatWord, searchType);
+                    cin.ignore();
+                    search.LoopSearch(_tree, FormatWord, searchType);
+                }
                 break;
 
             case 8: //Remove uncommon words
@@ -171,13 +189,16 @@ int Menu(AvlTree<DATA, string> *_tree)
             case 0: //Exit the program
                 return 0;
             default: //Invalid input
-                cout << "Invalid input. \nPress any key to continue..." << endl;
+                cin.ignore();
+                cout << "\nInvalid input. Press enter to continue..." << endl;
                 getchar();
         }
 
         if (count > 0)
             cout << "Read " << to_string(count) << " words." << endl;
 
+        cin.ignore();
+        cout << "\nPress enter to continue..." << endl;
         getchar();
         system("CLS");
     }
@@ -187,16 +208,16 @@ void PrintTable(AvlTree<DATA, string> *_tree)
 {
     double n = 1;
     //table header
-    cout << setfill('$') << setw(52) << "$" << endl;
+    cout << setfill('$') << setw(55) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(15) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(52) << "*" << endl;
+    cout << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setfill('*') << setw(55) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
     _tree->AVL_TraverseInOrder(PrintRow);
 
-    cout << setfill('$') << setw(52) << "$" << endl;
+    cout << setfill('$') << setw(55) << "$" << endl;
     cout << setfill(' ') << fixed;
 
 }
@@ -205,12 +226,12 @@ void PrintRow(DATA *_node)
 {
     if (_node->data.empty())
         cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(4) << setw(15) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(4) << setw(18) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
 
     for (ARTICLE &d : _node->data)
     {
         string ch = d.path.substr(9, 7);
-        cout << setprecision(0) << setw(15) << _node->key << setprecision(4) << setw(10) << ch << setw(22) << d.GetInstances() << endl;
+        cout << setprecision(0) << setw(18) << _node->key << setprecision(4) << setw(10) << ch << setw(22) << d.GetInstances() << endl;
 
         if (PRINT_POS)
         {
@@ -225,26 +246,7 @@ void PrintRow(DATA *_node)
         }
     }
 
-    cout << setfill('-') << setw(52) << "-" << endl;
+    cout << setfill('-') << setw(55) << "-" << endl;
     cout << setfill(' ') << fixed;
 }
 
-string FormatFileName(string _fn)
-{
-    for (int i = 0; i < _fn.size(); i++)
-    {
-        // Finding the character whose
-        // ASCII value fall under this
-        // range
-        if (_fn[i] == '/' || _fn[i] == '\\' || _fn[i] == '?' || _fn[i] == '%' || _fn[i] == '*' || _fn[i] == ':' || _fn[i] == '|' || _fn[i] == '"' || _fn[i] == '<' || _fn[i] == '>' || _fn[i] == '.' ||
-            _fn[i] == ',' || _fn[i] == ';' || _fn[i] == '=' || _fn[i] == ' ')
-        {
-            // erase function to erase
-            // the character
-            _fn.erase(i, 1);
-            i--;
-        }
-    }
-
-    return _fn;
-}
