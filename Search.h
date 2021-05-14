@@ -9,8 +9,8 @@ class Search
 {
     void PrintRow(DATA, int);
 
-
     static int GetLevDist(string, string);
+
 
 public:
     void LoopSearch(AvlTree<DATA, string> *, string (*)(string), string);
@@ -219,7 +219,6 @@ int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Di
     return dist[l2][l1];
 }
 
-// Prints occurrences of _candidate[] in _input[]
 vector<int> Search::KMPSearch(string _input, string _candidate)
 {
     vector<int> indices;
@@ -264,7 +263,6 @@ vector<int> Search::KMPSearch(string _input, string _candidate)
     return indices;
 }
 
-// Fills lps[] for given patttern pat[0..M-1]
 void Search::ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps)
 {
     // length of the previous longest prefix suffix
@@ -305,6 +303,9 @@ void Search::ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps)
 
 int Search::Compare_Contains(DATA _candidate, DATA _input)
 {
+    if (!INCL_PHRASES && _candidate.wordCount > 1)
+        return 0;
+
     int score;
 
     if (_candidate.key == _input.key)
@@ -329,6 +330,9 @@ int Search::Compare_Contains(DATA _candidate, DATA _input)
 
 int Search::Compare_Lev(DATA _candidate, DATA _input)
 {
+    if (!INCL_PHRASES && _candidate.wordCount > 1)
+        return 0;
+
     int score;
 
     if (_candidate.key == _input.key)
@@ -347,7 +351,7 @@ void Search::PrintTable(vector<DATA> data)
     //table header
     cout << setfill('$') << setw(60) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
     cout << setfill('*') << setw(60) << "*" << endl;
     cout << setfill(' ') << fixed;
 
@@ -364,8 +368,8 @@ void Search::PrintTable(vector<pair<DATA, int>> data)
     //table header
     cout << setfill('$') << setw(60) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(60) << "*" << endl;
+    cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setfill('*') << setw(66) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
@@ -377,18 +381,21 @@ void Search::PrintTable(vector<pair<DATA, int>> data)
 
 void Search::PrintRow(DATA _node, int _index)
 {
+    if (!INCL_PHRASES && _node.wordCount > 1)
+        return;
+
     if (_node.data.empty())
         cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(18) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(24) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
 
     for (int i = 0; i < _node.data.size(); i++)
     {
         string ch = _node.data[i].path.substr(9, 7);
         string result = to_string(_index) + "." + to_string(i + 1);
-        cout << setprecision(0) << setw(8) << result << setw(18) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
+        cout << setprecision(0) << setw(8) << result << setw(24) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
     }
 
-    cout << setfill('-') << setw(60) << "-" << endl;
+    cout << setfill('-') << setw(66) << "-" << endl;
     cout << setfill(' ') << fixed;
 }
 

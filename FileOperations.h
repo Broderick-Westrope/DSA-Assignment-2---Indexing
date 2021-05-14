@@ -23,6 +23,8 @@ void GetArticle(string str, string &path, vector<int> &positions, char token);
 
 int FindArticle(vector<ARTICLE> _v, const string &_path);
 
+/////////////////////////////////////
+
 int ScanBook(AvlTree<DATA, string> *_tree)
 {
     int wordCount = 0;
@@ -30,8 +32,34 @@ int ScanBook(AvlTree<DATA, string> *_tree)
     {
         wordCount += ScanChapter("..\\texts\\CH" + to_string(i) + ".txt", _tree);
     }
-    WORD_COUNT = wordCount;
     return wordCount;
+}
+
+void AddWord(AvlTree<DATA, string> *_tree, DATA _newData, int _wordPos, string _file)
+{
+    bool exists = _tree->AVL_Retrieve(_newData.key, _newData); //Check to see if the word already exists in our dictionary
+
+    int articleIndex = FindArticle(_newData.data, _file); //Find the article that corresponds to this file/chapter (if it exits)
+    if (_newData.data.empty() || articleIndex == -1) //If there are no articles or our one doesn't exist
+    {
+        ARTICLE tempArt(_file); //Create the article with the appropriate data
+        tempArt.pos.push_back(_wordPos); //Mark the position
+        _newData.data.push_back(tempArt); //Add the data
+    }
+    else //Else, if it already exists
+    {
+        _newData.data[articleIndex].pos.push_back(_wordPos); //Mark the position
+    }
+
+    if (exists) //If the data already exists in our dictionary
+    {
+        if (!_tree->AVL_Update(_newData.key, _newData)) //Update it
+            cout << "***ERROR: Failed to update the retrieved value!***" << endl; //Output an error log if the updating is unsuccessful
+    }
+    else //Else, if it doesn't exist yet
+    {
+        _tree->AVL_Insert(_newData); //Insert it as a new dictionary item
+    }
 }
 
 int ScanChapter(const string &_file, AvlTree<DATA, string> *_tree)
@@ -47,7 +75,7 @@ int ScanChapter(const string &_file, AvlTree<DATA, string> *_tree)
 
     int wordPos = 1;
     DATA newData;
-    string word1, word2, word3;
+    string word1, word2, word3; //Word1 = current word, word2 = 1 word back, word3 = 2 words back
 
     while (file >> word1)
     {
@@ -55,44 +83,46 @@ int ScanChapter(const string &_file, AvlTree<DATA, string> *_tree)
         if (word1.empty()) //Skip any words that consisted of only symbols
             continue;
 
-        //Create the base data
+        //Create the base newData
         newData.data = vector<ARTICLE>();
+
         newData.key = word1;
+        newData.wordCount = 1;
+        AddWord(_tree, newData, wordPos, _file);
 
-        bool exists = _tree->AVL_Retrieve(newData.key, newData); //Check to see if the word1 already exists in our dictionary
+        if (INCL_PHRASES)
+        {
+            if (!word2.empty())
+            {
+                newData.key = word1 + " " + word2;
+                newData.wordCount = 2;
+                AddWord(_tree, newData, wordPos, _file);
 
-        int articleIndex = FindArticle(newData.data, _file); //Find the article that corresponds to this file/chapter (if it exits)
-        if (newData.data.empty() || articleIndex == -1) //If there are no articles or our one doesn't exist
-        {
-            ARTICLE tempArt(_file); //Create the article with the appropriate data
-            tempArt.pos.push_back(wordPos); //Mark the position
-            newData.data.push_back(tempArt); //Add the data
-        }
-        else //Else, if it already exists
-        {
-            newData.data[articleIndex].pos.push_back(wordPos); //Mark the position
-        }
+                if (!word3.empty())
+                {
+                    newData.key = word1 + " " + word2 + " " + word3;
+                    newData.wordCount = 3;
+                    AddWord(_tree, newData, wordPos, _file);
+                }
+            }
 
-        if (exists) //If the data already exists in our dictionary
-        {
-            if (!_tree->AVL_Update(newData.key, newData)) //Update it
-                cout << "***ERROR: Failed to update the retrieved value!***" << endl; //Output an error log if the updating is unsuccessful
+            word3 = word2;
+            word2 = word1;
         }
-        else //Else, if it doesn't exist yet
-        {
-            _tree->AVL_Insert(newData); //Insert it as a new dictionary item
-        }
-
-        wordPos++; //Increment the word1 position/count
+        wordPos++; //Increment the word position/count
     }
+    WORD_COUNT += wordPos;
     return wordPos;
 }
 
 void SaveNode(DATA _node)
 {
-    ofstream saveFile(SAVE_FILE, ios_base::app);
-    saveFile << _node;
-    saveFile.close();
+    if (INCL_PHRASES || _node.wordCount == 1)
+    {
+        ofstream saveFile(SAVE_FILE, ios_base::app);
+        saveFile << _node;
+        saveFile.close();
+    }
 }
 
 int FindArticle(vector<ARTICLE> _v, const string &_path)
@@ -238,5 +268,28 @@ string FormatFileName(string _fn)
     return _fn;
 }
 
+bool EvaluateUncommon(DATA _node, double _bound)
+{
+    if (_node.GetFrequency(WORD_COUNT) < _bound)
+    {
+        cout << to_string(_node.GetFrequency(WORD_COUNT)) << " is less than " << _bound << endl;
+        return true;
+    }
+//    cout << to_string(_node.GetFrequency(WORD_COUNT)) << " is not less than " << _bound << endl;
+    return false;
+}
+
+void RemoveUncommon(AvlTree<DATA, string> *_tree, double _bound)
+{
+    queue<DATA> badEggs = _tree->AVL_RemoveUncommon(EvaluateUncommon, _bound);
+    queue<DATA> copy;
+    cout << "Deleted " << to_string(badEggs.size()) << " nodes with frequency lower than " << to_string(_bound) << ".";
+    while (!badEggs.empty())
+    {
+        _tree->AVL_Delete(badEggs.front().key);
+        copy.push(badEggs.front());
+        badEggs.pop();
+    }
+}
 
 #endif //DSA_INDEXING_ASSIGNMENT2_FILEOPERATIONS_H

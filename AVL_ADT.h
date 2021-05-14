@@ -97,6 +97,10 @@ public:
     vector<TYPE> AVL_GetStrictResults(KTYPE bound1, KTYPE bound2);
 
     void _getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, vector<TYPE> &_v);
+
+    void _removeUncommon(NODE<TYPE> *ptr, double _bound, queue<TYPE> &_badEggs, bool (*evaluate)(TYPE, double));
+
+    queue<TYPE> AVL_RemoveUncommon(bool (*evaluate)(TYPE, double), double _bound);
 }; // class AvlTree
 
 /*	=================== Constructor ===================	
@@ -1005,10 +1009,7 @@ template<class TYPE, class KTYPE>
 void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDiff, vector<pair<TYPE, int>> &minDiffNodes, int (*comparison)(TYPE n1, TYPE n2))
 {
     if (ptr == NULL)
-    {
-        printf("NULL REACHED\n");
         return;
-    }
 
     int diff = comparison(ptr->data, _node);
 
@@ -1069,4 +1070,29 @@ void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYP
         in right subtree */
     if (bound2 > root->data.key)
         _getNodesInRange(root->right, bound1, bound2, _v);
+}
+
+template<class TYPE, class KTYPE>
+queue<TYPE> AvlTree<TYPE, KTYPE>::AVL_RemoveUncommon(bool (*evaluate)(TYPE node, double bound), double _bound)
+{
+    queue<TYPE> _badEggs;
+
+    _removeUncommon(tree, _bound, _badEggs, evaluate);
+
+    return _badEggs;
+}
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>::_removeUncommon(NODE<TYPE> *ptr, double _bound, queue<TYPE> &_badEggs, bool (*evaluate)(TYPE node, double _bound))
+{
+    if (!ptr)
+        return;
+
+    if (evaluate(ptr->data, _bound))
+    {
+        _badEggs.push(ptr->data);
+    }
+
+    _removeUncommon(ptr->left, _bound, _badEggs, evaluate);
+    _removeUncommon(ptr->right, _bound, _badEggs, evaluate);
 }

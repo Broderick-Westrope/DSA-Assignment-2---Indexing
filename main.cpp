@@ -11,9 +11,10 @@
 
 using namespace std;
 
-int WORD_COUNT;
+int WORD_COUNT = 0;
 string SAVE_FILE = "save.txt";
 bool PRINT_POS = false;
+bool INCL_PHRASES = false;
 
 #include "DATA.h"
 #include "Quicksort.h"
@@ -79,10 +80,11 @@ int Menu(AvlTree<DATA, string> *_tree)
                 "PRINT:\n"
                 " -[4]-   Print the dictionary\n" //Prints each word, how many files contain it, and then lists each containing file with all the positions
                 " -[5]-   Print all words starting with a given letter\n"
-                " -[6]-   Print the tree data\n" //prints the AVL tree (using Dongmos original AVL function)
+                " -[6]-   Print the level & balance of each node\n" //prints the AVL tree (using Dongmos original AVL function)
+                " -[7]-   Print the number of nodes in the tree\n"
                 "OTHER:\n"
-                " -[7]-   Search for a word\n"
-                " -[8]-   Remove uncommon (low frequency) words/phrases from the dictionary\n"
+                " -[8]-   Search for a word\n"
+                " -[9]-   Remove uncommon (low frequency) words/phrases from the dictionary\n"
                 "\n"
                 " -[0]-   Exit the program\n\n"
                 "What would you like to do?\n";
@@ -106,6 +108,11 @@ int Menu(AvlTree<DATA, string> *_tree)
 
             case 2: //Read an article
                 system("CLS");
+                cout << "Would you like to read phrases as well as words? [Y/N]" << endl;
+                cin >> input;
+                INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
+
+                system("CLS");
                 cout << "What article would you like to read? (eg. 'harryPotter'. Only write the name of the file)" << endl;
                 cin >> input;
                 input = FormatFileName(input);
@@ -120,6 +127,11 @@ int Menu(AvlTree<DATA, string> *_tree)
                 { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
                 else
                 {
+                    system("CLS");
+                    cout << "Would you like to save phrases as well as words? [Y/N]" << endl;
+                    cin >> input;
+                    INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
+
                     system("CLS");
                     cout << "What file would you like to save to? (eg. 'saveFile'. Only write the name of the file)" << endl;
                     cin >> input;
@@ -136,6 +148,11 @@ int Menu(AvlTree<DATA, string> *_tree)
                 else
                 {
                     system("CLS");
+                    cout << "Would you like to print phrases as well as words? [Y/N]" << endl;
+                    cin >> input;
+                    INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
+
+                    system("CLS");
                     cout << "Do you want to print all the positions? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
                     cin >> input;
                     PRINT_POS = (input == "Y" || input == "y") ? true : false;
@@ -147,21 +164,42 @@ int Menu(AvlTree<DATA, string> *_tree)
                 if (_tree->AVL_Empty())
                 { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
                 else
-                { search.DictionaryStartingWith(_tree); }
+                {
+                    system("CLS");
+                    cout << "Would you like to print phrases as well as words? [Y/N]" << endl;
+                    cin >> input;
+                    INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
+                    search.DictionaryStartingWith(_tree);
+                }
                 break;
 
-            case 6: //Print the tree data
+            case 6: //Print level & balance of each node in the tree
                 if (_tree->AVL_Empty())
                 { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
                 else
                 { _tree->AVL_Print(); }
                 break;
 
-            case 7: //Search for a word
+            case 7:
                 if (_tree->AVL_Empty())
                 { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
                 else
                 {
+                    system("CLS");
+                    cout << "Node Count: " << _tree->AVL_Count();
+                }
+                break;
+
+            case 8: //Search for a word
+                if (_tree->AVL_Empty())
+                { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
+                else
+                {
+                    system("CLS");
+                    cout << "Would you like to search for phrases as well as words? [Y/N]" << endl;
+                    cin >> input;
+                    INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
+
                     system("CLS");
                     cout << "What kind of search do you want to do?\n"
                             " -[1]- Strict (Results are words/phrases that start with your search query)\n"
@@ -182,8 +220,12 @@ int Menu(AvlTree<DATA, string> *_tree)
                 }
                 break;
 
-            case 8: //Remove uncommon words
-
+            case 9: //Remove uncommon words
+                double bound;
+                system("CLS");
+                cout << "What would you like to make the lowest frequency? (anything below this decimal value will be deleted)" << endl;
+                cin >> bound;
+                RemoveUncommon(_tree, bound);
                 break;
 
             case 0: //Exit the program
@@ -210,7 +252,7 @@ void PrintTable(AvlTree<DATA, string> *_tree)
     //table header
     cout << setfill('$') << setw(55) << "$" << endl;
     cout << setfill(' ') << fixed;
-    cout << setw(18) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
+    cout << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
     cout << setfill('*') << setw(55) << "*" << endl;
     cout << setfill(' ') << fixed;
 
@@ -224,14 +266,17 @@ void PrintTable(AvlTree<DATA, string> *_tree)
 
 void PrintRow(DATA *_node)
 {
+    if (!INCL_PHRASES && _node->wordCount > 1)
+        return;
+
     if (_node->data.empty())
         cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(4) << setw(18) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(4) << setw(24) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
 
     for (ARTICLE &d : _node->data)
     {
         string ch = d.path.substr(9, 7);
-        cout << setprecision(0) << setw(18) << _node->key << setprecision(4) << setw(10) << ch << setw(22) << d.GetInstances() << endl;
+        cout << setprecision(0) << setw(24) << _node->key << setprecision(4) << setw(10) << ch << setw(22) << d.GetInstances() << endl;
 
         if (PRINT_POS)
         {

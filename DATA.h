@@ -9,7 +9,6 @@ using namespace std;
 
 class ARTICLE //The articles's data
 {
-    int instances = pos.size();
 public:
     string path;
     vector<int> pos;
@@ -19,7 +18,7 @@ public:
 
     int GetInstances()
     {
-        return instances;
+        return pos.size();
     }
 };
 
@@ -28,11 +27,14 @@ class DATA //The Node's data
     double freq;
 public:
     string key;
+    int wordCount;
     vector<ARTICLE> data;
 
     double GetFrequency(int _wordCount)
     {
-        double total = GetInstances();
+        auto total = static_cast<double>(GetInstances());
+        if (total == 0.0)
+            return 0.0;
         return (total / static_cast<double>(_wordCount)) * 1000.0;
     }
 
