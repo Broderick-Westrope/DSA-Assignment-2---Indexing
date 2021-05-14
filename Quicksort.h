@@ -1,19 +1,19 @@
 //
-// Created by ascle on 12/05/2021.
+// Created by Broderick Westrope on 12/05/2021.
 //
 
 #ifndef DSA_INDEXING_ASSIGNMENT2_QUICKSORT_H
 #define DSA_INDEXING_ASSIGNMENT2_QUICKSORT_H
 
 //region - pair<DATA, int>
-void swap(pair<DATA, int> *a, pair<DATA, int> *b)
+void Swap(pair<DATA, int> *_a, pair<DATA, int> *_b)
 {
-    pair<DATA, int> t = *a;
-    *a = *b;
-    *b = t;
+    pair<DATA, int> t = *_a;
+    *_a = *_b;
+    *_b = t;
 }
 
-int partition(vector<pair<DATA, int>> &_v, int low, int high)
+int Partition(vector<pair<DATA, int>> &_v, int low, int high)
 {
     pair<DATA, int> pivot = _v[high];
     int i = (low - 1);
@@ -23,22 +23,22 @@ int partition(vector<pair<DATA, int>> &_v, int low, int high)
         if (_v[j].second >= pivot.second)
         {
             i++;
-            swap(&_v[i], &_v[j]);
+            Swap(&_v[i], &_v[j]);
         }
     }
-    swap(&_v[i + 1], &_v[high]);
+    Swap(&_v[i + 1], &_v[high]);
 
     return (i + 1);
 }
 
-vector<pair<DATA, int>> quickSort(vector<pair<DATA, int>> _v, int low, int high)
+vector<pair<DATA, int>> QuickSort(vector<pair<DATA, int>> _v, int low, int high)
 {
     if (low < high)
     {
-        int pi = partition(_v, low, high);
+        int pi = Partition(_v, low, high);
 
-        _v = quickSort(_v, low, pi - 1);
-        _v = quickSort(_v, pi + 1, high);
+        _v = QuickSort(_v, low, pi - 1);
+        _v = QuickSort(_v, pi + 1, high);
     }
 
     return _v;

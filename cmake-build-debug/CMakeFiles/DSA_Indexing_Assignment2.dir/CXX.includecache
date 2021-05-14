@@ -12,7 +12,11 @@ C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assi
 
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/FileOperations.h
 
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/MenuOptions.h
+
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Quicksort.h
+
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Saving&Loading.h
 
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Search.h
 
@@ -31,10 +35,6 @@ vector
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/vector
 algorithm
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/algorithm
-bits/stdc++.h
--
-filesystem
--
 queue
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/queue
 DATA.h
@@ -45,6 +45,10 @@ AVL_ADT.h
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/AVL_ADT.h
 Search.h
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Search.h
+Saving&Loading.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Saving&Loading.h
 FileOperations.h
 C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/FileOperations.h
+MenuOptions.h
+C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/MenuOptions.h
 

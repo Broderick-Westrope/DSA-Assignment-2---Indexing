@@ -101,11 +101,10 @@ istream &operator>>(istream &in, DATA &obj) //Loading Save
 
 ostream &operator<<(ostream &out, DATA &obj) //Saving Data
 {
-    out << obj.key << endl;
+    out << obj.wordCount << ' ' << obj.key << endl;
 
     for (ARTICLE d : obj.data)
     {
-//        string fName = d.path.substr(9, 7);
         out << d.path << ' ';
 
         for (int i = 0; i < d.pos.size(); i++)

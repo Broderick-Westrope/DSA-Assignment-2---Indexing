@@ -1,5 +1,5 @@
 //
-// Created by ascle on 7/05/2021.
+// Created by Broderick Westrope on 7/05/2021.
 //
 
 #ifndef DSA_INDEXING_ASSIGNMENT2_SEARCH_H
@@ -7,50 +7,53 @@
 
 class Search
 {
-    void PrintRow(DATA, int);
+private:
+    //Strict/Starts-with Search
+    void StrictSearch(string _query, AvlTree<DATA, string> *_tree);
+
+    //KMP Pattern Matching (Contains)
+    void ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+
+    static vector<int> KMP_Matching(string _input, string _candidate);
+
+    static void ComputeLPS_Array(const string &_candidate, int C, vector<int> &_lps);
+
+    static int Compare_KMP(DATA _candidate, DATA _input);
+
+    //Levenshtein Distance
+    void LevSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+
+    static int Compare_LEV(DATA _candidate, DATA _input);
 
     static int GetLevDist(string, string);
 
-
-public:
-    void LoopSearch(AvlTree<DATA, string> *, string (*)(string), string);
-
-    static int Compare_Lev(DATA, DATA);
-
+    //Printing
     void PrintTable(vector<DATA>);
-
-    void StrictSearch(string _query, AvlTree<DATA, string> *_tree);
-
-    static void ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps);
-
-    static int Compare_Contains(DATA _candidate, DATA _input);
-
-    static vector<int> KMPSearch(string _input, string _candidate);
 
     void PrintTable(vector<pair<DATA, int>> data);
 
-    void ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+    void PrintRow(DATA, int);
 
-    void LevSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+public:
+    //Search Engine
+    void LoopSearch(AvlTree<DATA, string> *, string (*)(string), string);
 
-    void DictionaryStartingWith(AvlTree<DATA, string> *_tree);
+    //Print Dictionary Chapter
+    void SearchWordsStartingWith(AvlTree<DATA, string> *_tree);
 };
-
 
 void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string), string _searchType)
 {
     while (true)
     {
         string query;
-        cout << "SEARCH THE HARRY POTTER CHAPTERS:       (Type '~E' to exit searching)" << endl;
+        cout << "SEARCH THE HARRY POTTER CHAPTERS:       (Type '~' to exit searching)" << endl;
         getline(cin, query);
         system("CLS");
 
-        if (query == "~E")
-        {
-            cout << "Leaving..." << endl;
+        if (query == "~")
             return;
-        }
+
         query = FormatWord(query);
         if (query.empty())
         {
@@ -77,14 +80,14 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(strin
             }
         }
 
-        cin.ignore();
         cout << endl << "Press Enter To Continue..." << endl;
+//        cin.ignore();
         getchar();
         system("CLS");
     }
 }
 
-void Search::DictionaryStartingWith(AvlTree<DATA, string> *_tree)
+void Search::SearchWordsStartingWith(AvlTree<DATA, string> *_tree)
 {
     while (true)
     {
@@ -115,7 +118,7 @@ void Search::DictionaryStartingWith(AvlTree<DATA, string> *_tree)
     }
 }
 
-void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree) //strict
+void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree)
 {
     string upperBound;
     char lastChar = static_cast<char>(_query[_query.size() - 1] + 1);
@@ -145,10 +148,10 @@ void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree) //strict
     }
 }
 
-void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree) //contains
+void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree)
 {
-    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_Contains);
-    quickSort(results, 0, results.size() - 1);
+    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_KMP);
+    QuickSort(results, 0, results.size() - 1);
 
     if (results.empty())
     {
@@ -166,60 +169,7 @@ void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree) //contain
     }
 }
 
-void Search::LevSearch(DATA _qData, AvlTree<DATA, string> *_tree) //levenshtein
-{
-    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_Lev);
-    quickSort(results, 0, results.size() - 1);
-
-    if (results.empty())
-    {
-        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
-    }
-    else
-    {
-        cout << "Top " << results.size() << " results for your search of " << _qData.key;
-        if (results.front().first.key == _qData.key)
-        {
-            cout << ", including an exact match!";
-        }
-        cout << endl;
-        PrintTable(results);
-    }
-}
-
-int Search::GetLevDist(string input, string candidate) //Gets the Levenshtein Distance between two strings to find the closest result
-{
-    int i, j, l1 = (int) input.size(), l2 = (int) candidate.size(), t, track;
-    int dist[input.size() + candidate.size()][input.size() + candidate.size()];
-
-    for (i = 0; i <= l1; i++)
-    {
-        dist[0][i] = i;
-    }
-    for (j = 0; j <= l2; j++)
-    {
-        dist[j][0] = j;
-    }
-    for (j = 1; j <= l1; j++)
-    {
-        for (i = 1; i <= l2; i++)
-        {
-            if (input[i - 1] == candidate[j - 1])
-            {
-                track = 0;
-            }
-            else
-            {
-                track = 1;
-            }
-            t = min((dist[i - 1][j] + 1), (dist[i][j - 1] + 1));
-            dist[i][j] = min(t, (dist[i - 1][j - 1] + track));
-        }
-    }
-    return dist[l2][l1];
-}
-
-vector<int> Search::KMPSearch(string _input, string _candidate)
+vector<int> Search::KMP_Matching(string _input, string _candidate)
 {
     vector<int> indices;
 
@@ -231,7 +181,7 @@ vector<int> Search::KMPSearch(string _input, string _candidate)
     vector<int> lps(I);
 
     // Preprocess the pattern (calculate lps[] array)
-    ComputeLPSArray(_input, I, lps);
+    ComputeLPS_Array(_input, I, lps);
 
     int i = 0; // index for _candidate[]
     int j = 0; // index for _input[]
@@ -263,7 +213,7 @@ vector<int> Search::KMPSearch(string _input, string _candidate)
     return indices;
 }
 
-void Search::ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps)
+void Search::ComputeLPS_Array(const string &_candidate, int C, vector<int> &_lps)
 {
     // length of the previous longest prefix suffix
     int len = 0;
@@ -301,7 +251,7 @@ void Search::ComputeLPSArray(const string &_candidate, int C, vector<int> &_lps)
     }
 }
 
-int Search::Compare_Contains(DATA _candidate, DATA _input)
+int Search::Compare_KMP(DATA _candidate, DATA _input)
 {
     if (!INCL_PHRASES && _candidate.wordCount > 1)
         return 0;
@@ -313,7 +263,7 @@ int Search::Compare_Contains(DATA _candidate, DATA _input)
         return 100;
     }
 
-    vector<int> indices = KMPSearch(_input.key, _candidate.key);
+    vector<int> indices = KMP_Matching(_input.key, _candidate.key);
 
     score = (int) indices.size();
 
@@ -328,7 +278,28 @@ int Search::Compare_Contains(DATA _candidate, DATA _input)
     return score;
 }
 
-int Search::Compare_Lev(DATA _candidate, DATA _input)
+void Search::LevSearch(DATA _qData, AvlTree<DATA, string> *_tree)
+{
+    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_LEV);
+    QuickSort(results, 0, results.size() - 1);
+
+    if (results.empty())
+    {
+        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
+    }
+    else
+    {
+        cout << "Top " << results.size() << " results for your search of " << _qData.key;
+        if (results.front().first.key == _qData.key)
+        {
+            cout << ", including an exact match!";
+        }
+        cout << endl;
+        PrintTable(results);
+    }
+}
+
+int Search::Compare_LEV(DATA _candidate, DATA _input)
 {
     if (!INCL_PHRASES && _candidate.wordCount > 1)
         return 0;
@@ -343,6 +314,38 @@ int Search::Compare_Lev(DATA _candidate, DATA _input)
     score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
     score -= GetLevDist(_candidate.key, _input.key);
     return score;
+}
+
+int Search::GetLevDist(string input, string candidate)
+{
+    int i, j, l1 = (int) input.size(), l2 = (int) candidate.size(), t, track;
+    int dist[input.size() + candidate.size()][input.size() + candidate.size()];
+
+    for (i = 0; i <= l1; i++)
+    {
+        dist[0][i] = i;
+    }
+    for (j = 0; j <= l2; j++)
+    {
+        dist[j][0] = j;
+    }
+    for (j = 1; j <= l1; j++)
+    {
+        for (i = 1; i <= l2; i++)
+        {
+            if (input[i - 1] == candidate[j - 1])
+            {
+                track = 0;
+            }
+            else
+            {
+                track = 1;
+            }
+            t = min((dist[i - 1][j] + 1), (dist[i][j - 1] + 1));
+            dist[i][j] = min(t, (dist[i - 1][j - 1] + track));
+        }
+    }
+    return dist[l2][l1];
 }
 
 void Search::PrintTable(vector<DATA> data)
@@ -398,6 +401,5 @@ void Search::PrintRow(DATA _node, int _index)
     cout << setfill('-') << setw(66) << "-" << endl;
     cout << setfill(' ') << fixed;
 }
-
 
 #endif //DSA_INDEXING_ASSIGNMENT2_SEARCH_H

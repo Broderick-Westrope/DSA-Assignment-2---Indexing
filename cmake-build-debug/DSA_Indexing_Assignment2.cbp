@@ -86,7 +86,13 @@
 		<Unit filename="C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/FileOperations.h">
 			<Option target="DSA_Indexing_Assignment2"/>
 		</Unit>
+		<Unit filename="C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/MenuOptions.h">
+			<Option target="DSA_Indexing_Assignment2"/>
+		</Unit>
 		<Unit filename="C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Quicksort.h">
+			<Option target="DSA_Indexing_Assignment2"/>
+		</Unit>
+		<Unit filename="C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Saving&amp;Loading.h">
 			<Option target="DSA_Indexing_Assignment2"/>
 		</Unit>
 		<Unit filename="C:/Users/ascle/Desktop/UNI/DSA/assignments/Assignment 2 - Text Indexing/DSA-Assignment-2---Indexing/Search.h">
