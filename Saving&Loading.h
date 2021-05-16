@@ -5,13 +5,23 @@
 #ifndef DSA_INDEXING_ASSIGNMENT2_SAVING_LOADING_H
 #define DSA_INDEXING_ASSIGNMENT2_SAVING_LOADING_H
 
-void ClearSaves();
+class SavingLoading
+{
+    AvlTree<DATA, string> *tree;
 
-void SaveNode(DATA _node);
+    void GetArticle(string str, vector<int> &positions);
 
-int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree);
+public:
+    SavingLoading(AvlTree<DATA, string> *_tree) : tree(_tree)
+    {};
 
-void ClearSaves()
+    void ClearSaves();
+
+    int LoadNodes(const string &_path);
+};
+
+
+void SavingLoading::ClearSaves()
 {
     ofstream ofs;
     ofs.open(SAVE_FILE, std::ofstream::out | std::ofstream::trunc);
@@ -28,32 +38,35 @@ void SaveNode(DATA _node)
     }
 }
 
-void GetArticle(string str, vector<int> &positions)
+void SavingLoading::GetArticle(string str, vector<int> &positions)
 {
-    char token = ' ';
+    char delim = ' ';
     //Skips the delimiters at the beginning of the string
-    int lastPosition = str.find_first_not_of(token, 0);
+    int lastPos = str.find_first_not_of(delim, 0);
     //Find the first non delimiter
-    int position = str.find_first_of(token, lastPosition);
+    int pos = str.find_first_of(delim, lastPos);
 
     //While loop which iterates through a string to subract tokens
-    while (string::npos != position || string::npos != lastPosition)
+    while (string::npos != pos || string::npos != lastPos)
     {
-        //Adds found token to the vector
-        positions.push_back(stoi(str.substr(lastPosition, position - lastPosition)));
+        //Adds found delim to the vector
+        positions.push_back(stoi(str.substr(lastPos, pos - lastPos)));
         //Finds the next delimiter
-        lastPosition = str.find_first_not_of(token, position);
+        lastPos = str.find_first_not_of(delim, pos);
         //Finds the next non delimiter
-        position = str.find_first_of(token, lastPosition);
+        pos = str.find_first_of(delim, lastPos);
     }
 }
 
-int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
+int SavingLoading::LoadNodes(const string &_path)
 {
     ifstream loadFile(_path);
 
     if (loadFile.fail())
+    {
         cout << "Failed to open the save file " << _path << ". Check that it exists, then try again." << endl;
+        return 0;
+    }
 
     int wordCount;
     string word, tempWord, articleData;
@@ -68,7 +81,7 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
     {
         loadFile >> tempWord;
 
-        if (tempWord == "") //todo figure out how to change the eof to remove this statement and the use of tempWord
+        if (tempWord == "" || tempWord == "\n")
         {
             break;
         }
@@ -83,8 +96,14 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
                 word += ' ';
         }
 
-        while (true) //Loop through the lines of chapters
+        for (int i = 0; i <= 50; i++) //Loop through the lines of chapters (max of 50 iterations)
         {
+            if (i >= 50)
+            {
+                cout << "ERROR: The word/phrase '" << word << "' was found to be in more than 50 different articles (this is the max)." << endl;
+                break;
+            }
+
             getline(loadFile, articleData);
 
             if (articleData == "")
@@ -112,6 +131,9 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
             wordPos += positions.size();
         }
 
+        if (word == "ha")
+            cout << word << " has " << pathsList.size() << endl;
+
         if (positionsList.empty())
             cout << "ERROR: The article positions were empty." << endl;
         else if (positionsList.size() != pathsList.size())
@@ -119,29 +141,26 @@ int LoadNodes(const string &_path, AvlTree<DATA, string> *_tree)
 
         tempData.key = word;
         tempData.wordCount = wordCount;
-        for (int i = 0; i < pathsList.size(); i++)
+        for (int i = 0; i < positionsList.size(); i++)
         {
-//            if (positionsList[i].empty())
-//                continue;
+            if (positionsList[i].empty() || positionsList[i].empty())
+                continue;
             ARTICLE tempArticle(pathsList[i]);
-//            cout << pathsList[i] << " : " << positionsList[i].size() << " : " << positionsList[i][0] << endl;
             tempArticle.pos = positionsList[i];
             tempData.data.push_back(tempArticle);
         }
 
-        bool exists = _tree->AVL_Retrieve(tempData.key, tempData); //Check to see if the word already exists in our dictionary
+        bool exists = tree->AVL_Retrieve(tempData.key, tempData); //Check to see if the word already exists in our dictionary
 
         if (exists) //If the data already exists in our dictionary
         {
-            if (!_tree->AVL_Update(tempData.key, tempData)) //Update it
+            if (!tree->AVL_Update(tempData.key, tempData)) //Update it
                 cout << "***ERROR: Failed to update the retrieved value!***" << endl; //Output an error log if the updating is unsuccessful
         }
         else //Else, if it doesn't exist yet
         {
-            _tree->AVL_Insert(tempData); //Insert it as a new dictionary item
+            tree->AVL_Insert(tempData); //Insert it as a new dictionary item
         }
-
-//        wordPos += tempData.GetInstances();
 
         word = "", tempWord = "", articleData = "";
         pathsList.clear();

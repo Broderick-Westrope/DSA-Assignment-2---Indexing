@@ -18,10 +18,12 @@ int WORD_COUNT = 0;
 string SAVE_FILE = "saveFile.txt";
 bool PRINT_POS = false;
 bool INCL_PHRASES = false;
+char WHAT_TO_REMOVE;
 
 #include "DATA.h"
 #include "Quicksort.h"
 #include "AVL_ADT.h"
+#include "Printing.h"
 #include "Search.h"
 #include "Saving&Loading.h"
 #include "FileOperations.h"
@@ -30,7 +32,7 @@ bool INCL_PHRASES = false;
 
 int Menu(AvlTree<DATA, string> *_tree)
 {
-    Search search;
+    MenuOptions options(_tree, FileOperations(_tree), SavingLoading(_tree), Search(_tree, Printing(_tree)), Printing(_tree));
 
     while (true)
     {
@@ -77,28 +79,28 @@ int Menu(AvlTree<DATA, string> *_tree)
 
         int action;
         cin >> action;
-        int count = 0;
 
         switch (action)
         {
             case 1: //Read a save file
-                count = ReadSaveFile(_tree);
+                options.ReadSaveFile();
                 break;
 
             case 2: //Read an article
-                count = ReadArticle(_tree);
+                options.ReadArticle();
                 break;
 
             case 3: //Save the dictionary
-                SaveDictionary(_tree);
+                options.SaveDictionary();
                 break;
 
             case 4: //Print the dictionary
-                PrintDictionary(_tree);
+                options.PrintDictionary();
                 break;
 
             case 5: //Print dictionary starting with a letter
-                PrintWordsStartingWith(_tree, search);
+                options.PrintWordsStartingWith();
+
                 break;
 
             case 6: //Print level & balance of each node in the tree
@@ -122,15 +124,11 @@ int Menu(AvlTree<DATA, string> *_tree)
                 break;
 
             case 8: //Search for a word
-                SearchForWord(_tree, search);
+                options.SearchForWord();
                 break;
 
             case 9: //Remove uncommon words
-                double bound;
-                system("CLS");
-                cout << "What would you like to make the lowest frequency? (anything below this decimal value will be deleted)" << endl;
-                cin >> bound;
-                RemoveUncommon(_tree, bound);
+                options.RemoveUncommon();
                 break;
 
             case 0: //Exit the program
@@ -140,9 +138,6 @@ int Menu(AvlTree<DATA, string> *_tree)
                 cout << "\nInvalid input. Press enter to continue..." << endl;
                 getchar();
         }
-
-        if (count > 0)
-            cout << "Read " << to_string(count) << " words." << endl;
 
         cin.ignore();
         cout << "\nPress enter to continue..." << endl;

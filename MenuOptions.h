@@ -5,39 +5,50 @@
 #ifndef DSA_INDEXING_ASSIGNMENT2_MENUOPTIONS_H
 #define DSA_INDEXING_ASSIGNMENT2_MENUOPTIONS_H
 
-//region - Function Declarations
-int ReadSaveFile(AvlTree<DATA, string> *_tree);
+class MenuOptions
+{
+    AvlTree<DATA, string> *tree;
+    Search search;
+    SavingLoading saveLoad;
+    FileOperations fileOps;
+    Printing printing;
+public:
+    MenuOptions(AvlTree<DATA, string> *_tree, FileOperations _fileOps, SavingLoading saveLoad, Search search, Printing printing)
+            : tree(_tree), fileOps(_fileOps), saveLoad(saveLoad), search(search), printing(printing)
+    {};
 
-int ReadArticle(AvlTree<DATA, string> *_tree);
+    void ReadSaveFile();
 
-void SaveDictionary(AvlTree<DATA, string> *_tree);
+    void ReadArticle();
 
-void PrintDictionary(AvlTree<DATA, string> *_tree);
+    void SaveDictionary();
 
-void PrintWordsStartingWith(AvlTree<DATA, string> *_tree, Search _search);
+    void PrintDictionary();
 
-void SearchForWord(AvlTree<DATA, string> *_tree, Search _search);
+    void PrintWordsStartingWith();
 
-void PrintRow(DATA *_node);
+    void SearchForWord();
 
-void PrintTable(AvlTree<DATA, string> *_tree);
-//endregion
+    void RemoveUncommon();
+};
 
 //region - Option Functions
-int ReadSaveFile(AvlTree<DATA, string> *_tree)
+//region - Reading
+void MenuOptions::ReadSaveFile()
 {
     string input;
     system("CLS");
     cout << "What file would you like to load from? (eg. 'saveFile'. Only write the name of the file)" << endl;
     cin >> input;
-    input = FormatFileName(input);
-    cout << "Loading from '" << input << ".txt'... (This can take a minute or two with big files)" << endl;
-    int count = LoadNodes("..\\" + input + ".txt", _tree);
-    cout << "Done. Loading was successful." << endl;
-    return count;
+    input = fileOps.FormatFileName(input);
+    system("CLS");
+    cout << "Loading from '" << input << ".txt'... (This can take a minute or two with big files)" << endl << endl;
+    int count = saveLoad.LoadNodes("..\\" + input + ".txt");
+    cout << "Done. Successfully loaded " << to_string(count) << " words/phrases." << endl;
+    WORD_COUNT += count;
 }
 
-int ReadArticle(AvlTree<DATA, string> *_tree)
+void MenuOptions::ReadArticle()
 {
     string input;
     system("CLS");
@@ -48,17 +59,22 @@ int ReadArticle(AvlTree<DATA, string> *_tree)
     system("CLS");
     cout << "What article would you like to read? (eg. 'harryPotter'. Only write the name of the file)" << endl;
     cin >> input;
-    input = FormatFileName(input);
+    input = fileOps.FormatFileName(input);
     if (input == "harryPotter")
-        return ScanHarryPotter(_tree);
+    {
+        fileOps.ScanHarryPotter();
+        return;
+    }
 
-    return ScanArticle("..\\" + input + ".txt", _tree);
+    fileOps.ScanArticle("..\\" + input + ".txt");
 }
+//endregion
 
-void SaveDictionary(AvlTree<DATA, string> *_tree)
+//region - Writing
+void MenuOptions::SaveDictionary()
 {
     string input;
-    if (_tree->AVL_Empty())
+    if (tree->AVL_Empty())
     { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
     else
     {
@@ -70,19 +86,21 @@ void SaveDictionary(AvlTree<DATA, string> *_tree)
         system("CLS");
         cout << "What file would you like to save to? (eg. 'saveFile'. Only write the name of the file)" << endl;
         cin >> input;
-        input = FormatFileName(input);
+        input = fileOps.FormatFileName(input);
         SAVE_FILE = "..\\" + input + ".txt";
-        ClearSaves();
+        saveLoad.ClearSaves();
         cout << "Saving to '" << input << ".txt'... (This can take a minute or two with big trees)" << endl;
-        _tree->AVL_TraverseBreadth(SaveNode);
+        tree->AVL_TraverseBreadth(SaveNode);
         cout << "Done. Saving was successful." << endl;
     }
 }
+//endregion
 
-void PrintDictionary(AvlTree<DATA, string> *_tree)
+//region - Printing & Searching
+void MenuOptions::PrintDictionary()
 {
     string input;
-    if (_tree->AVL_Empty())
+    if (tree->AVL_Empty())
     { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
     else
     {
@@ -92,17 +110,17 @@ void PrintDictionary(AvlTree<DATA, string> *_tree)
         INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
 
         system("CLS");
-        cout << "Do you want to print all the positions? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
+        cout << "Do you want to print all the positions/locations? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
         cin >> input;
         PRINT_POS = (input == "Y" || input == "y") ? true : false;
-        PrintTable(_tree);
+        printing.Dictionary_PrintTable();
     }
 }
 
-void PrintWordsStartingWith(AvlTree<DATA, string> *_tree, Search _search)
+void MenuOptions::PrintWordsStartingWith()
 {
     string input;
-    if (_tree->AVL_Empty())
+    if (tree->AVL_Empty())
     { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
     else
     {
@@ -110,14 +128,19 @@ void PrintWordsStartingWith(AvlTree<DATA, string> *_tree, Search _search)
         cout << "Would you like to print phrases as well as words? [Y/N]" << endl;
         cin >> input;
         INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
-        _search.SearchWordsStartingWith(_tree);
+
+        system("CLS");
+        cout << "Do you want to print all the positions/locations? [Y/N] (These can be really long and cause table-alignment issues)" << endl;
+        cin >> input;
+        PRINT_POS = (input == "Y" || input == "y") ? true : false;
+        search.SearchWordsStartingWith();
     }
 }
 
-void SearchForWord(AvlTree<DATA, string> *_tree, Search _search)
+void MenuOptions::SearchForWord()
 {
     string input, searchType;
-    if (_tree->AVL_Empty())
+    if (tree->AVL_Empty())
     { cout << "The dictionary is empty. Be sure to scan a dictionary file or article first." << endl; }
     else
     {
@@ -127,7 +150,7 @@ void SearchForWord(AvlTree<DATA, string> *_tree, Search _search)
         INCL_PHRASES = (input == "Y" || input == "y") ? true : false;
 
         system("CLS");
-        cout << "What kind of search do you want to do?\n"
+        cout << "What kind of search do you want to do? (NOTE: only option 1 allows for ordering based off a words frequency)\n"
                 " -[1]- Strict (Results are words/phrases that start with your search query)\n"
                 " -[2]- Contains (Results are words/phrases that contain your search query)\n"
                 " -[3]- Levenshtein (Results are all words passed to find the closest to your\n"
@@ -142,78 +165,59 @@ void SearchForWord(AvlTree<DATA, string> *_tree, Search _search)
             cout << "Invalid input. I'll do a strict search for you" << endl;
 
         cin.ignore();
-        _search.LoopSearch(_tree, FormatKey, searchType);
+        search.LoopSearch(FormatKey, searchType);
     }
 }
+//endregion
 
-void PrintTable(AvlTree<DATA, string> *_tree)
-{
-    double n = 1;
-    //table header
-    cout << setfill('$') << setw(55) << "$" << endl;
-    cout << setfill(' ') << fixed;
-    cout << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(55) << "*" << endl;
-    cout << setfill(' ') << fixed;
-
-    //Data
-    _tree->AVL_TraverseInOrder(PrintRow);
-
-    cout << setfill('$') << setw(55) << "$" << endl;
-    cout << setfill(' ') << fixed;
-
-}
-
-void PrintRow(DATA *_node)
-{
-    if (!INCL_PHRASES && _node->wordCount > 1)
-        return;
-
-    if (_node->data.empty())
-        cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(4) << setw(24) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
-
-    for (ARTICLE &d : _node->data)
-    {
-        string ch = d.path.substr(9, 7);
-        cout << setprecision(0) << setw(24) << _node->key << setprecision(4) << setw(10) << ch << setw(22) << d.GetInstances() << endl;
-
-        if (PRINT_POS)
-        {
-            cout << "Positions: (";
-            for (int i = 0; i < d.pos.size(); i++)
-            {
-                cout << to_string(d.pos[i]);
-                if (i != d.pos.size() - 1)
-                    cout << ", ";
-            }
-            cout << ") " << endl;
-        }
-    }
-
-    cout << setfill('-') << setw(55) << "-" << endl;
-    cout << setfill(' ') << fixed;
-}
-
+//region - Remove Uncommon Words
 bool EvaluateUncommon(DATA _node, double _bound)
 {
+    if ((WHAT_TO_REMOVE == 'W' && _node.wordCount > 1) || (WHAT_TO_REMOVE == 'P' && _node.wordCount == 1))
+        return false;
+
     if (_node.GetFrequency(WORD_COUNT) < _bound)
         return true;
     return false;
 }
 
-void RemoveUncommon(AvlTree<DATA, string> *_tree, double _bound)
+void MenuOptions::RemoveUncommon()
 {
-    queue<DATA> badEggs = _tree->AVL_RemoveUncommon(EvaluateUncommon, _bound);
+    double bound;
+    system("CLS");
+    cout << "What would you like to make the lowest frequency? (anything below this decimal value will be deleted)" << endl;
+    cin >> bound;
+
+    char input;
+    system("CLS");
+    cout << "Would you like to remove [W]ords, [P]hrases, or [B]oth? (Enter one of the three letters. Invalid input will default to phrases)" << endl;
+    cin >> input;
+
+    if (input == 'w' || input == 'W')
+        WHAT_TO_REMOVE = 'W';
+    else if (input == 'b' || input == 'B')
+        WHAT_TO_REMOVE = 'B';
+    else
+        WHAT_TO_REMOVE = 'P';
+
+    queue<DATA> badEggs = tree->AVL_RemoveUncommon(EvaluateUncommon, bound);
     queue<DATA> copy;
-    cout << "Deleted " << to_string(badEggs.size()) << " nodes with frequency lower than " << to_string(_bound) << ".";
+    cout << "Deleted " << to_string(badEggs.size());
+    if (WHAT_TO_REMOVE == 'W')
+        cout << " words ";
+    else if (WHAT_TO_REMOVE == 'P')
+        cout << " phrases ";
+    else
+        cout << " words & phrases ";
+    cout << "with frequency lower than " << to_string(bound) << ".";
     while (!badEggs.empty())
     {
-        _tree->AVL_Delete(badEggs.front().key);
+        tree->AVL_Delete(badEggs.front().key);
         copy.push(badEggs.front());
         badEggs.pop();
     }
 }
+//endregion
 //endregion
 
 #endif //DSA_INDEXING_ASSIGNMENT2_MENUOPTIONS_H

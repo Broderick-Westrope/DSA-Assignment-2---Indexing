@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class ARTICLE //The articles's data
+class ARTICLE //The article's data
 {
 public:
     string path;
@@ -55,50 +55,6 @@ bool operator<(DATA p1, DATA p2)
     return p1.GetFrequency(WORD_COUNT) < p2.GetFrequency(WORD_COUNT);
 }
 
-istream &operator>>(istream &in, DATA &obj) //Loading Save
-{
-//    string key, path;
-//    int occurences;
-//    vector<int> pos;
-//
-//    //Line
-//    string sLine;
-//    getline(in, sLine);
-////    cout << sLine << endl;
-//
-//    int wordCount = 0;
-//    string tempWord;
-//    for (char c : sLine)
-//    {
-//        if (c == ' ')
-//        {
-//            if (wordCount == 0)
-//                key = tempWord;
-//            wordCount++;
-//            continue;
-//        }
-//
-//        if (wordCount == 1 || wordCount > 2)
-//        {
-//            if (c >= '0' && c <= '9')
-//            {
-//
-//            }
-//        }
-//        if ((c >= 'A' && c <= 'Z') || (c >= 'a' || c <= 'z'))
-//    }
-//
-//    for (ARTICLE d : obj.data)
-//    {
-//        string fName = d.path.substr(9, 7);
-//        out << obj.key << ' ' << d.occurences << ' ' << fName;
-//        for (int i : d.pos)
-//            out << ' ' << to_string(i);
-//        out << endl;
-//    }
-    return in;
-}
-
 ostream &operator<<(ostream &out, DATA &obj) //Saving Data
 {
     out << obj.wordCount << ' ' << obj.key << endl;
@@ -110,13 +66,11 @@ ostream &operator<<(ostream &out, DATA &obj) //Saving Data
         for (int i = 0; i < d.pos.size(); i++)
         {
             out << to_string(d.pos[i]) << ' ';
-//            if (i == d.pos.size() - 1)
-//                out << '|';
         }
         out << endl;
     }
 
-    out << "# " << endl;
+    out << '#' << endl;
     return out;
 }
 

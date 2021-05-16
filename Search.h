@@ -7,12 +7,14 @@
 
 class Search
 {
-private:
+    AvlTree<DATA, string> *tree;
+    Printing printing;
+
     //Strict/Starts-with Search
-    void StrictSearch(string _query, AvlTree<DATA, string> *_tree);
+    void StrictSearch(string, string);
 
     //KMP Pattern Matching (Contains)
-    void ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+    void ContainsSearch(DATA);
 
     static vector<int> KMP_Matching(string _input, string _candidate);
 
@@ -21,29 +23,36 @@ private:
     static int Compare_KMP(DATA _candidate, DATA _input);
 
     //Levenshtein Distance
-    void LevSearch(DATA _qData, AvlTree<DATA, string> *_tree);
+    void LevSearch(DATA);
 
     static int Compare_LEV(DATA _candidate, DATA _input);
 
     static int GetLevDist(string, string);
 
-    //Printing
-    void PrintTable(vector<DATA>);
-
-    void PrintTable(vector<pair<DATA, int>> data);
-
-    void PrintRow(DATA, int);
 
 public:
-    //Search Engine
-    void LoopSearch(AvlTree<DATA, string> *, string (*)(string), string);
+    Search(AvlTree<DATA, string> *_tree, Printing printing) : tree(_tree), printing(printing)
+    {};
 
-    //Print Dictionary Chapter
-    void SearchWordsStartingWith(AvlTree<DATA, string> *_tree);
+    //Search Engine
+    void LoopSearch(string (*)(string), string);
+
+    //Print Dictionary 'Chapter'/Section
+    void SearchWordsStartingWith();
 };
 
-void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(string), string _searchType)
+void Search::LoopSearch(string (*FormatWord)(string), string _searchType)
 {
+    string sortType;
+    if (_searchType == "Strict")
+    {
+        system("CLS");
+        cout << "Did you want to sort the results in order of frequency? [Y/N] (if not, the results will be in alphabetical order)\n" << endl;
+        cin >> sortType;
+        sortType = (sortType == "y" || sortType == "Y") ? "Freq" : "Alpha";
+        cin.ignore();
+    }
+
     while (true)
     {
         string query;
@@ -66,28 +75,28 @@ void Search::LoopSearch(AvlTree<DATA, string> *_tree, string (*FormatWord)(strin
             qData.key = FormatWord(query);
             if (_searchType == "Strict")
             {
-                StrictSearch(query, _tree);
+                StrictSearch(query, sortType);
             }
             else if (_searchType == "Contains")
             {
-                ContainsSearch(qData, _tree);
+                ContainsSearch(qData);
             }
             else
             {
                 if (_searchType != "Lev")
                     cout << "ERROR: No valid search type was provided." << endl;
-                LevSearch(qData, _tree);
+                LevSearch(qData);
             }
         }
 
+        cin.ignore();
         cout << endl << "Press Enter To Continue..." << endl;
-//        cin.ignore();
         getchar();
         system("CLS");
     }
 }
 
-void Search::SearchWordsStartingWith(AvlTree<DATA, string> *_tree)
+void Search::SearchWordsStartingWith()
 {
     while (true)
     {
@@ -108,7 +117,7 @@ void Search::SearchWordsStartingWith(AvlTree<DATA, string> *_tree)
         }
         else
         {
-            StrictSearch(string(1, query), _tree);
+            StrictSearch(string(1, query), "Alpha");
         }
 
         cin.ignore();
@@ -118,45 +127,98 @@ void Search::SearchWordsStartingWith(AvlTree<DATA, string> *_tree)
     }
 }
 
-void Search::StrictSearch(string _query, AvlTree<DATA, string> *_tree)
+//region - Strict Search
+// (results have to start with the search query)
+void Search::StrictSearch(string _query, string _sort)
 {
-    string upperBound;
+    string upperBound = _query.substr(0, _query.size() - 1);
     char lastChar = static_cast<char>(_query[_query.size() - 1] + 1);
-    if (_query.size() > 1)
-    {
-        for (int i = 0; i < _query.size() - 1; i++)
-        {
-            upperBound += _query[i];
-        }
-    }
     upperBound += lastChar;
-    vector<DATA> results = _tree->AVL_GetStrictResults(_query, upperBound);
 
-    if (results.empty())
+    if (_sort == "Freq")
     {
-        cout << "There were no results for your search of " << _query << ". Make sure you have scanned a dictionary or article and try again." << endl;
+        priority_queue<DATA> results;
+        tree->AVL_GetStrictResults(_query, upperBound, results);
+
+        if (results.empty())
+        {
+            cout << "There were no results for your search of '" << _query << "'. Make sure you have scanned a dictionary or article and try again." << endl;
+        }
+        else
+        {
+            cout << "Top " << results.size() << " results for your search of " << _query << "." << endl;
+            printing.Search_PrintTable(results);
+
+            string moreInfo;
+            cout << "Enter a result (whole number) you would like to see more of, or enter '~' to do another search." << endl;
+            cin >> moreInfo;
+
+            bool isNum = true;
+            for (char c:moreInfo)
+            {
+                if (!isdigit(c))
+                {
+                    isNum = false;
+                    break;
+                }
+            }
+
+            if (isNum)
+            {
+                int digit = stoi(moreInfo);
+                int i = 1;
+                while (i != digit)
+                {
+                    results.pop();
+                    i++;
+                }
+                printing.Search_PrintNode(results.top());
+            }
+            else if (moreInfo != "~")
+                cout << "Invalid input so I'll do another search for you" << endl;
+        }
     }
     else
     {
-        cout << "Top " << results.size() << " results for your search of " << _query;
-        if (results.front().key == _query)
+        vector<DATA> results;
+        tree->AVL_GetStrictResults(_query, upperBound, results);
+
+        if (results.empty())
         {
-            cout << ", including an exact match!";
+            cout << "There were no results for your search of " << _query << ". Make sure you have scanned a dictionary or article and try again." << endl;
         }
-        cout << endl;
-        PrintTable(results);
+        else
+        {
+            cout << "Top " << results.size() << " results for your search of " << _query;
+            if (results.front().key == _query)
+            {
+                cout << ", including an exact match!";
+            }
+            cout << endl;
+            printing.Search_PrintTable(results);
+
+            char moreInfo;
+            cout << "Enter a result (whole number) you would like to see more of, or enter '~' to do another search?" << endl;
+            cin >> moreInfo;
+
+            if (isdigit(moreInfo))
+                printing.Search_PrintNode(results[atoi(&moreInfo) - 1]);
+            else if (moreInfo != '~')
+                cout << "Invalid input so I'll do another search for you" << endl;
+        }
     }
 }
+//endregion
 
-void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree)
+//region - KMP Search
+// (results have to contain the search query)
+void Search::ContainsSearch(DATA _qData)
 {
-    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_KMP);
+    vector<pair<DATA, int>> results = tree->AVL_GetClosestNodes(_qData, Compare_KMP);
     QuickSort(results, 0, results.size() - 1);
 
     if (results.empty())
-    {
-        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
-    }
+    { cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl; }
     else
     {
         cout << "Top " << results.size() << " results for your search of " << _qData.key;
@@ -165,7 +227,7 @@ void Search::ContainsSearch(DATA _qData, AvlTree<DATA, string> *_tree)
             cout << ", including an exact match!";
         }
         cout << endl;
-        PrintTable(results);
+        printing.Search_PrintTable(results);
     }
 }
 
@@ -176,15 +238,14 @@ vector<int> Search::KMP_Matching(string _input, string _candidate)
     int I = (int) _input.size();
     int C = (int) _candidate.size();
 
-    // create lps[] that will hold the longest prefix suffix
-    // values for pattern
+    //Stores our LPS (longest prefix-suffix) values for the pattern (the input)
     vector<int> lps(I);
 
-    // Preprocess the pattern (calculate lps[] array)
+    // Preprocess the pattern (calculate the LPS values)
     ComputeLPS_Array(_input, I, lps);
 
-    int i = 0; // index for _candidate[]
-    int j = 0; // index for _input[]
+    int i = 0;
+    int j = 0;
     while (i < C)
     {
         if (_input[j] == _candidate[i])
@@ -196,53 +257,42 @@ vector<int> Search::KMP_Matching(string _input, string _candidate)
         if (j == I)
         {
             indices.push_back(i - j);
-//            printf("Found pattern at index %d ", i - j);
             j = lps[j - 1];
         }
-        else if (i < C && _input[j] != _candidate[i]) // mismatch after j matches
+        else if (i < C && _input[j] != _candidate[i]) //Mismatch after 'J' number of matches
         {
-            // Do not match lps[0..lps[j-1]] characters,
-            // they will match anyway
+            //LPS[0..lps[j-1]] characters already match so don't attempt those
             if (j != 0)
                 j = lps[j - 1];
             else
                 i = i + 1;
         }
     }
-
     return indices;
 }
 
 void Search::ComputeLPS_Array(const string &_candidate, int C, vector<int> &_lps)
 {
-    // length of the previous longest prefix suffix
-    int len = 0;
+    //Stores length of the previous LPS
+    int length = 0;
 
-    _lps[0] = 0; // lps[0] is always 0
+    _lps[0] = 0; //Index 0 is always of value 0
 
-    // the loop calculates lps[i] for i = 1 to M-1
+    //Calculate LPS[i] for indices i = 1 to i = (M-1)
     int i = 1;
     while (i < C)
     {
-        if (_candidate[i] == _candidate[len])
+        if (_candidate[i] == _candidate[length])
         {
-            len++;
-            _lps[i] = len;
+            length++;
+            _lps[i] = length;
             i++;
         }
-        else // (pat[i] != pat[len])
+        else //When the value at candidate[i] no longer matches that at candidate[length]
         {
-            // This is tricky. Consider the example.
-            // AAACAAAA and i = 7. The idea is similar
-            // to search step.
-            if (len != 0)
-            {
-                len = _lps[len - 1];
-
-                // Also, note that we do not increment
-                // i here
-            }
-            else // if (len == 0)
+            if (length != 0)
+            { length = _lps[length - 1]; }
+            else
             {
                 _lps[i] = 0;
                 i++;
@@ -253,73 +303,63 @@ void Search::ComputeLPS_Array(const string &_candidate, int C, vector<int> &_lps
 
 int Search::Compare_KMP(DATA _candidate, DATA _input)
 {
+    //If we don't want to include this node in the search (if it's a phrase and we are only looking for words)
     if (!INCL_PHRASES && _candidate.wordCount > 1)
-        return 0;
+    { return 0; }
 
-    int score;
-
-    if (_candidate.key == _input.key)
-    {
-        return 100;
-    }
+    if (_candidate.key == _input.key) //If this is an exact match
+    { return 100; }
 
     vector<int> indices = KMP_Matching(_input.key, _candidate.key);
-
-    score = (int) indices.size();
+    int score = (int) indices.size();
 
     if (!indices.empty())
     {
-        if (indices[0] == 0) //If the candidate's key starts with the input's key
-        {
-            score = 10 + ((int) indices.size() - 1);
-        }
+        if (indices[0] == 0) //If the candidate's key starts with the input's key it's a bonus (this would also be a result in strict search)
+        { score = 10 + ((int) indices.size() - 1); }
     }
 
     return score;
 }
+//endregion
 
-void Search::LevSearch(DATA _qData, AvlTree<DATA, string> *_tree)
+//region - Levenshtein Search
+// (results include all nodes passed in an attempt to find the search query. These are ordered using the algorithm for Levenshtein Distance)
+void Search::LevSearch(DATA _qData)
 {
-    vector<pair<DATA, int>> results = _tree->AVL_GetClosestNodes(_qData, Compare_LEV);
+    vector<pair<DATA, int>> results = tree->AVL_GetClosestNodes(_qData, Compare_LEV);
     QuickSort(results, 0, results.size() - 1);
 
     if (results.empty())
-    {
-        cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl;
-    }
+    { cout << "There were no results for your search of " << _qData.key << ". Make sure you have scanned a dictionary or article and try again." << endl; }
     else
     {
         cout << "Top " << results.size() << " results for your search of " << _qData.key;
         if (results.front().first.key == _qData.key)
-        {
-            cout << ", including an exact match!";
-        }
+        { cout << ", including an exact match!"; }
         cout << endl;
-        PrintTable(results);
+        printing.Search_PrintTable(results);
     }
 }
 
 int Search::Compare_LEV(DATA _candidate, DATA _input)
 {
     if (!INCL_PHRASES && _candidate.wordCount > 1)
-        return 0;
-
-    int score;
+    { return 0; }
 
     if (_candidate.key == _input.key)
     {
         return 100;
     }
-
-    score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
+    int score = (int) max(_candidate.key.size(), _input.key.size()) + 10;
     score -= GetLevDist(_candidate.key, _input.key);
     return score;
 }
 
-int Search::GetLevDist(string input, string candidate)
+int Search::GetLevDist(string _input, string _candidate)
 {
-    int i, j, l1 = (int) input.size(), l2 = (int) candidate.size(), t, track;
-    int dist[input.size() + candidate.size()][input.size() + candidate.size()];
+    int i, j, l1 = (int) _input.size(), l2 = (int) _candidate.size(), t, track;
+    int dist[_input.size() + _candidate.size()][_input.size() + _candidate.size()];
 
     for (i = 0; i <= l1; i++)
     {
@@ -333,7 +373,7 @@ int Search::GetLevDist(string input, string candidate)
     {
         for (i = 1; i <= l2; i++)
         {
-            if (input[i - 1] == candidate[j - 1])
+            if (_input[i - 1] == _candidate[j - 1])
             {
                 track = 0;
             }
@@ -347,59 +387,7 @@ int Search::GetLevDist(string input, string candidate)
     }
     return dist[l2][l1];
 }
+//endregion
 
-void Search::PrintTable(vector<DATA> data)
-{
-    double n = 1;
-    //table header
-    cout << setfill('$') << setw(60) << "$" << endl;
-    cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(60) << "*" << endl;
-    cout << setfill(' ') << fixed;
-
-    //Data
-    for (int i = 0; i < data.size(); i++)
-    {
-        PrintRow(data[i], i + 1);
-    }
-}
-
-void Search::PrintTable(vector<pair<DATA, int>> data)
-{
-    double n = 1;
-    //table header
-    cout << setfill('$') << setw(60) << "$" << endl;
-    cout << setfill(' ') << fixed;
-    cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(66) << "*" << endl;
-    cout << setfill(' ') << fixed;
-
-    //Data
-    for (int i = 0; i < data.size(); i++)
-    {
-        PrintRow(data[i].first, i + 1);
-    }
-}
-
-void Search::PrintRow(DATA _node, int _index)
-{
-    if (!INCL_PHRASES && _node.wordCount > 1)
-        return;
-
-    if (_node.data.empty())
-        cout << "ERROR: No data to PrintRow." << endl;
-    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(24) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
-
-    for (int i = 0; i < _node.data.size(); i++)
-    {
-        string ch = _node.data[i].path.substr(9, 7);
-        string result = to_string(_index) + "." + to_string(i + 1);
-        cout << setprecision(0) << setw(8) << result << setw(24) << _node.key << setw(10) << ch << setw(22) << _node.data[i].GetInstances() << endl;
-    }
-
-    cout << setfill('-') << setw(66) << "-" << endl;
-    cout << setfill(' ') << fixed;
-}
 
 #endif //DSA_INDEXING_ASSIGNMENT2_SEARCH_H

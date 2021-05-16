@@ -5,14 +5,24 @@
 #ifndef DSA_INDEXING_ASSIGNMENT2_FILEOPERATIONS_H
 #define DSA_INDEXING_ASSIGNMENT2_FILEOPERATIONS_H
 
-int FindArticle(vector<ARTICLE> _v, const string &_path)
+class FileOperations
 {
-    for (int i = 0; i < _v.size(); i++)
-        if (_v[i].path == _path)
-            return i;
+    AvlTree<DATA, string> *tree;
 
-    return -1;
-}
+    int FindArticle(vector<ARTICLE> _v, const string &_path);
+
+    void AddWord(DATA _newData, int _wordPos, string _file);
+
+public:
+    FileOperations(AvlTree<DATA, string> *_tree) : tree(_tree)
+    {};
+
+    string FormatFileName(string _fn);
+
+    int ScanArticle(const string &_file);
+
+    int ScanHarryPotter();
+};
 
 string FormatKey(string _k)
 {
@@ -20,7 +30,7 @@ string FormatKey(string _k)
 
     for (int i = 0; i < _k.size(); i++)
     {
-        if ((_k[i] < 'a' || _k[i] > 'z') && (_k[i] != ' '))// && ((_k[i] != '-') && i <= 1 && i >= _k.size() - 3))
+        if ((_k[i] < 'a' || _k[i] > 'z') && (_k[i] != ' '))
         {
             _k.erase(i, 1);
             i--;
@@ -29,7 +39,17 @@ string FormatKey(string _k)
     return _k;
 }
 
-string FormatFileName(string _fn)
+int FileOperations::FindArticle(vector<ARTICLE> _v, const string &_path)
+{
+    for (int i = 0; i < _v.size(); i++)
+        if (_v[i].path == _path)
+            return i;
+
+    return -1;
+}
+
+
+string FileOperations::FormatFileName(string _fn)
 {
     for (int i = 0; i < _fn.size(); i++)
     {
@@ -44,9 +64,9 @@ string FormatFileName(string _fn)
     return _fn;
 }
 
-void AddWord(AvlTree<DATA, string> *_tree, DATA _newData, int _wordPos, string _file)
+void FileOperations::AddWord(DATA _newData, int _wordPos, string _file)
 {
-    bool exists = _tree->AVL_Retrieve(_newData.key, _newData); //Check to see if the word already exists in our dictionary
+    bool exists = tree->AVL_Retrieve(_newData.key, _newData); //Check to see if the word already exists in our dictionary
 
     int articleIndex = FindArticle(_newData.data, _file); //Find the article that corresponds to this file/chapter (if it exits)
     if (_newData.data.empty() || articleIndex == -1) //If there are no articles or our one doesn't exist
@@ -62,16 +82,16 @@ void AddWord(AvlTree<DATA, string> *_tree, DATA _newData, int _wordPos, string _
 
     if (exists) //If the data already exists in our dictionary
     {
-        if (!_tree->AVL_Update(_newData.key, _newData)) //Update it
+        if (!tree->AVL_Update(_newData.key, _newData)) //Update it
             cout << "***ERROR: Failed to update the retrieved value!***" << endl; //Output an error log if the updating is unsuccessful
     }
     else //Else, if it doesn't exist yet
     {
-        _tree->AVL_Insert(_newData); //Insert it as a new dictionary item
+        tree->AVL_Insert(_newData); //Insert it as a new dictionary item
     }
 }
 
-int ScanArticle(const string &_file, AvlTree<DATA, string> *_tree)
+int FileOperations::ScanArticle(const string &_file)
 {
     ifstream file;
 
@@ -82,7 +102,7 @@ int ScanArticle(const string &_file, AvlTree<DATA, string> *_tree)
         cout << "ERROR: Failed to open the file " << _file << " for scanning." << endl;
     }
 
-    int wordPos = 1;
+    int wordPos = 0, phraseCount = 0;
     DATA newData;
     string word1, word2, word3; //Word1 = current word, word2 = 1 word back, word3 = 2 words back
 
@@ -97,7 +117,7 @@ int ScanArticle(const string &_file, AvlTree<DATA, string> *_tree)
 
         newData.key = word1;
         newData.wordCount = 1;
-        AddWord(_tree, newData, wordPos, _file);
+        AddWord(newData, wordPos, _file);
 
         if (INCL_PHRASES)
         {
@@ -105,13 +125,15 @@ int ScanArticle(const string &_file, AvlTree<DATA, string> *_tree)
             {
                 newData.key = word2 + " " + word1;
                 newData.wordCount = 2;
-                AddWord(_tree, newData, wordPos, _file);
+                AddWord(newData, wordPos, _file);
+                phraseCount++;
 
                 if (!word3.empty())
                 {
                     newData.key = word3 + " " + word2 + " " + word1;
                     newData.wordCount = 3;
-                    AddWord(_tree, newData, wordPos, _file);
+                    AddWord(newData, wordPos, _file);
+                    phraseCount++;
                 }
             }
 
@@ -120,16 +142,22 @@ int ScanArticle(const string &_file, AvlTree<DATA, string> *_tree)
         }
         wordPos++; //Increment the word position/count
     }
+
+    cout << "Read " << to_string(wordPos) << " words";
+    if (phraseCount > 0)
+        cout << ", and " << to_string(phraseCount) << " phrases";
+
+    cout << " from '" << _file << "'." << endl;
     WORD_COUNT += wordPos;
     return wordPos;
 }
 
-int ScanHarryPotter(AvlTree<DATA, string> *_tree)
+int FileOperations::ScanHarryPotter()
 {
     int wordCount = 0;
     for (int i = 1; i <= 17; i++)
     {
-        wordCount += ScanArticle("..\\texts\\CH" + to_string(i) + ".txt", _tree);
+        wordCount += ScanArticle("..\\texts\\CH" + to_string(i) + ".txt");
     }
     return wordCount;
 }

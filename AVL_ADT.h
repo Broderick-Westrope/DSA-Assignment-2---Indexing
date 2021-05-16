@@ -94,13 +94,17 @@ public:
 
     void _scanForResults(int (*process)(TYPE, TYPE), NODE<TYPE> *root, TYPE _target, vector<pair<TYPE, int>> &_v);
 
-    vector<TYPE> AVL_GetStrictResults(KTYPE bound1, KTYPE bound2);
+    void AVL_GetStrictResults(KTYPE bound1, KTYPE bound2, vector<TYPE> &);
+
+    void AVL_GetStrictResults(KTYPE bound1, KTYPE bound2, priority_queue<TYPE> &);
 
     void _getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, vector<TYPE> &_v);
 
     void _removeUncommon(NODE<TYPE> *ptr, double _bound, queue<TYPE> &_badEggs, bool (*evaluate)(TYPE, double));
 
     queue<TYPE> AVL_RemoveUncommon(bool (*evaluate)(TYPE, double), double _bound);
+
+    void _getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, priority_queue<TYPE> &_p);
 }; // class AvlTree
 
 /*	=================== Constructor ===================	
@@ -944,6 +948,7 @@ template<class TYPE, class KTYPE>
 void AvlTree<TYPE, KTYPE>::AVL_Print(void)
 {
 /*  statements */
+    cout << "Total number of words in the tree: " << to_string(AVL_Count()) << endl << endl;
     _print(tree, 0);
     return;
 }   /* AVL_PRINT */
@@ -954,7 +959,7 @@ void AvlTree<TYPE, KTYPE>::AVL_Print(void)
 	structure.
 */
 
-/*  This function uses recursion to PrintRow the tree. At each level, the
+/*  This function uses recursion to Search_PrintRow the tree. At each level, the
     level number is printed along with the node contents (an integer).
     Pre		root is the root of a tree or subtree
             level is the level of the tree: tree root is 0
@@ -1038,11 +1043,9 @@ void AvlTree<TYPE, KTYPE>::_closestNode(NODE<TYPE> *ptr, TYPE _node, int &minDif
 }
 
 template<class TYPE, class KTYPE>
-vector<TYPE> AvlTree<TYPE, KTYPE>::AVL_GetStrictResults(KTYPE bound1, KTYPE bound2)
+void AvlTree<TYPE, KTYPE>::AVL_GetStrictResults(KTYPE bound1, KTYPE bound2, vector<TYPE> &_v)
 {
-    vector<TYPE> v;
-    _getNodesInRange(tree, bound1, bound2, v);
-    return v;
+    _getNodesInRange(tree, bound1, bound2, _v);
 }
 
 template<class TYPE, class KTYPE>
@@ -1058,7 +1061,8 @@ void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYP
         then only we can get o/p keys
         in left subtree */
     if (bound1 < root->data.key)
-        _getNodesInRange(root->left, bound1, bound2, _v);
+        if (INCL_PHRASES || root->data.wordCount == 1)
+            _getNodesInRange(root->left, bound1, bound2, _v);
 
     /* if root's data lies in range,
     then prints root's data */
@@ -1070,6 +1074,40 @@ void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYP
         in right subtree */
     if (bound2 > root->data.key)
         _getNodesInRange(root->right, bound1, bound2, _v);
+}
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>::AVL_GetStrictResults(KTYPE bound1, KTYPE bound2, priority_queue<TYPE> &_p)
+{
+    _getNodesInRange(tree, bound1, bound2, _p);
+}
+
+template<class TYPE, class KTYPE>
+void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYPE bound2, priority_queue<TYPE> &_p)
+{
+    /* base case */
+    if (!root)
+        return;
+
+    /* Since the desired o/p is sorted,
+        recurse for left subtree first
+        If root->data is greater than bound1,
+        then only we can get o/p keys
+        in left subtree */
+    if (bound1 < root->data.key)
+        _getNodesInRange(root->left, bound1, bound2, _p);
+
+    /* if root's data lies in range,
+    then prints root's data */
+    if (bound1 <= root->data.key && bound2 > root->data.key)
+        if (INCL_PHRASES || root->data.wordCount == 1)
+            _p.push(root->data);
+
+    /* If root->data is smaller than bound2,
+        then only we can get o/p keys
+        in right subtree */
+    if (bound2 > root->data.key)
+        _getNodesInRange(root->right, bound1, bound2, _p);
 }
 
 template<class TYPE, class KTYPE>
