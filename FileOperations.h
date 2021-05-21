@@ -5,6 +5,10 @@
 #ifndef DSA_INDEXING_ASSIGNMENT2_FILEOPERATIONS_H
 #define DSA_INDEXING_ASSIGNMENT2_FILEOPERATIONS_H
 
+#include <chrono>
+
+using namespace std::chrono;
+
 class FileOperations
 {
     AvlTree<DATA, string> *tree;
@@ -30,7 +34,7 @@ string FormatKey(string _k)
 
     for (int i = 0; i < _k.size(); i++)
     {
-        if ((_k[i] < 'a' || _k[i] > 'z') && (_k[i] != ' '))
+        if ((_k[i] < 'a' || _k[i] > 'z') && _k[i] != ' ')
         {
             _k.erase(i, 1);
             i--;
@@ -100,10 +104,10 @@ int FileOperations::ScanArticle(const string &_file)
     if (file.fail())
     {
         cout << "ERROR: Failed to open the file " << _file << " for scanning." << endl;
+        return 0;
     }
 
     int wordPos = 0, phraseCount = 0;
-    DATA newData;
     string word1, word2, word3; //Word1 = current word, word2 = 1 word back, word3 = 2 words back
 
     while (file >> word1)
@@ -113,6 +117,7 @@ int FileOperations::ScanArticle(const string &_file)
             continue;
 
         //Create the base newData
+        DATA newData;
         newData.data = vector<ARTICLE>();
 
         newData.key = word1;
@@ -143,22 +148,47 @@ int FileOperations::ScanArticle(const string &_file)
         wordPos++; //Increment the word position/count
     }
 
-    cout << "Read " << to_string(wordPos) << " words";
-    if (phraseCount > 0)
-        cout << ", and " << to_string(phraseCount) << " phrases";
-
-    cout << " from '" << _file << "'." << endl;
+//    cout << "Read " << to_string(wordPos) << " words";
+//    if (phraseCount > 0)
+//        cout << ", and " << to_string(phraseCount) << " phrases";
+//
+//    cout << " from '" << _file << "'." << endl;
     WORD_COUNT += wordPos;
     return wordPos;
 }
 
 int FileOperations::ScanHarryPotter()
 {
+    auto start = high_resolution_clock::now();
+
     int wordCount = 0;
-    for (int i = 1; i <= 17; i++)
+    for (int i = 0; i <= 17; i++)
     {
-        wordCount += ScanArticle("..\\texts\\CH" + to_string(i) + ".txt");
+        double progress = (static_cast<double>(i) / 17.0); // for demonstration only
+        int barWidth = 70;
+
+        cout << "PROGRESS:" << setw(4) << int(progress * 100) << "% {";
+        int pos = barWidth * progress;
+        for (int j = 0; j < barWidth; j++)
+        {
+            if (j <= pos)
+            { cout << '#'; }
+            else
+            { cout << '.'; }
+        }
+        cout << "}\r";
+        cout.flush();
+
+        if (i != 17)
+            wordCount += ScanArticle("..\\texts\\CH" + to_string(i + 1) + ".txt");
     }
+    cout << endl;
+    cout << "TOTAL WORDS SCANNED: " << wordCount << endl;
+
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end - start);
+    cout << "TIME TAKEN (ms): " << duration.count() << endl;
+
     return wordCount;
 }
 

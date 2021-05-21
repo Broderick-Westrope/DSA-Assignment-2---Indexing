@@ -72,7 +72,7 @@ void Search::LoopSearch(string (*FormatWord)(string), string _searchType)
         else
         {
             DATA qData;
-            qData.key = FormatWord(query);
+            qData.key = query;
             if (_searchType == "Strict")
             {
                 StrictSearch(query, sortType);

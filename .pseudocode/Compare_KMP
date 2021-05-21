@@ -1,0 +1,18 @@
+FUNCTION Compare_KMP(candidate : the node being checked, input : the node containing the user-input query)
+    IF (We aren't including phrases in results AND the candidates wordCount > 1) THEN
+		Return 0
+	ENDIF
+
+    IF (the candidates key = the inputs key) THEN
+		Return 100
+	ENDIF
+
+	indices := KMP_Matching(inputs key, candidates key)
+    score := the number of letters in input
+
+    IF (indices is not empty) THEN
+        IF (indices[0] = 0)
+			score := 10 + (the number of letter in indices minus 1)
+		ENDIF
+    ENDIF
+    Return score

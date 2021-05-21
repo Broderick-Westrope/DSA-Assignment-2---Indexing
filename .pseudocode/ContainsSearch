@@ -1,0 +1,10 @@
+FUNCTION ContainsSearch(qData : Data type containing the search query information)
+    results := Attempt to get the searched node using tree functions and store each node along the way
+    Sort the results
+
+    IF (results is empty)
+		Tell the user that there were no results for their search query
+    ELSE
+        Print the users results
+    ENDIF
+	

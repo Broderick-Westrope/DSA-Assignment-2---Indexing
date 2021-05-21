@@ -1,0 +1,9 @@
+FUNCTION FormatKey(k : the key to be formatted)
+    Make all letters in k lowercase
+
+    FOR (each letter in the key)
+        IF (this letter is not an lowercase alphabetic letter) THEN
+            Erase the letter from k
+            Decrement which letter we are up to so we look at all letters
+        ENDIF
+    Return k

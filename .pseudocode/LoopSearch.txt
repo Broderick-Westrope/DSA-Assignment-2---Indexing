@@ -1,0 +1,33 @@
+FUNCTION LoopSearch (FormatWord : Pointer to a string function used to format input, type : A string to decide the type of search)
+    IF (type == "Strict") THEN
+        Clear the screen
+        Ask the user if they want to sort the results in order of frequency
+        sortType := the user input
+    ENDIF
+	DO
+        Tell the user to enter a search query or enter an exit value
+        query := the user input
+        
+        IF (query == exit value) THEN
+            Return
+        ENDIF
+        
+        query := FormatWord(query)
+        IF (query is empty) THEN
+            Tell the user there was no input
+            Start the loop again
+        ELSE
+            Create qData to store our data information
+            qData.key := query
+            IF (type == "Strict") THEN
+                StrictSearch(query, type)
+            ELSE IF(type == "Contains") THEN
+                ContainsSearch(qData)
+            ELSE
+                IF (type != "Lev") THEN
+                    Print an error log for invalid search type
+                ENDIF
+				LevSearch(qData)
+			ENDIF
+        ENDIF
+    WHILE (True)

@@ -1,0 +1,40 @@
+FUNCTION StrictSearch(query : The users search input, sort : The sort method)
+    upperBound := query but the last character is incremented by one
+
+    IF (sort = "Freq") THEN
+        results := use tree functions to get strict reults as a priority queue
+
+        IF (results is empty) THEN
+            Tell the user there were no results for their search
+        ELSE
+            Print the search results
+
+            Tell the user to enter an exit value, or a result number to see more about it
+            moreInfo := user input
+
+            IF (moreInfo is a number) THEN
+                Remove elements from results till the top is the one they want to know more about
+                Print detailed information on the top node in results
+            ELSE IF (moreInfo != the exit value) THEN
+                Tell the user their input was invalid
+            ENDIF
+        ENDIF
+    ELSE
+        results := use AVL functions to get strict reults as a vector
+
+        IF (results is empty) THEN
+            Tell the user there were no results for their search
+        ELSE
+            Print the search results
+
+            Tell the user to enter an exit value, or a result number to see more about it
+            moreInfo := user input
+
+            IF (moreInfo is a number) THEN
+                Remove elements from results till the top is the one they want to know more about
+                Print detailed information on the top node in results
+            ELSE IF (moreInfo != the exit value) THEN
+                Tell the user their input was invalid
+            ENDIF
+        ENDIF
+    ENDIF

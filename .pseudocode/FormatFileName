@@ -1,0 +1,8 @@
+FUNCTION FormatFileName(fn : the file name getting formatter)
+    FOR (each letter, c, in fn)
+        IF (the letter, c, is a symbol not allowed in file names) THEN
+            Erase that letter, c, from fn
+			Decrement which letter we are up to so we dont miss any
+        ENDIF
+    ENDFOR
+    Return fn

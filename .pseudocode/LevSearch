@@ -1,0 +1,9 @@
+FUNCTION LevSearch(qData : data type containing the search query)
+    results := Use AVL_GetClosestNodes(_qData, Compare_LEV) to get all nodes on the pathway to the search query
+   Use Quicksort to sort the results
+
+    IF (results are empty) THEN
+		Tell the user there were no results for their search
+    ELSE
+        Print the results for the users search
+    ENDIF

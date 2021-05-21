@@ -1,0 +1,30 @@
+FUNCTION KMP_Matching (input : The pattern string, candidate : The key of the node being checked)
+    indices := a list to store all the indices at which the the input was found within the candidate
+
+    I := the number of letters in input
+    C := the number of letters in candidate
+
+	lps := A list of size I used to store the LPS (longest prefix suffix) values for each point along the input/pattern
+
+    Use ComputeLPS_Array(input, I, lps) to calcuate the values for lps
+
+    i := 0
+    j := 0
+    DO 
+        IF (input[j] = candidate[i]) THEN
+            Increment j
+            Increment i
+        ENDIF
+
+        IF (j = I) THEN
+            indices.push_back(i - j);
+            j = lps[j - 1];
+        ELSE IF ((i < C) AND (input[j] != candidate[i])) THEN
+            IF (j != 0) THEN
+                j := lps[j - 1];
+            ELSE
+                Increment i
+			ENDIF
+		ENDIF
+    WHILE (i < C)
+    Return indices;

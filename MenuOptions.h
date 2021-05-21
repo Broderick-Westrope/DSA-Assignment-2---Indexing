@@ -30,6 +30,8 @@ public:
     void SearchForWord();
 
     void RemoveUncommon();
+
+    void DeleteBadEggs(double _bound);
 };
 
 //region - Option Functions
@@ -63,10 +65,16 @@ void MenuOptions::ReadArticle()
     if (input == "harryPotter")
     {
         fileOps.ScanHarryPotter();
-        return;
     }
-
-    fileOps.ScanArticle("..\\" + input + ".txt");
+    else
+    {
+        fileOps.ScanArticle("..\\" + input + ".txt");
+    }
+    if (WORD_COUNT != 0)
+    {
+        WHAT_TO_REMOVE = 'P';
+        DeleteBadEggs((1.0 / static_cast<double>(WORD_COUNT)) * 1000.0 + 0.0001);
+    }
 }
 //endregion
 
@@ -176,9 +184,30 @@ bool EvaluateUncommon(DATA _node, double _bound)
     if ((WHAT_TO_REMOVE == 'W' && _node.wordCount > 1) || (WHAT_TO_REMOVE == 'P' && _node.wordCount == 1))
         return false;
 
-    if (_node.GetFrequency(WORD_COUNT) < _bound)
+    if (_node.GetFrequency() < _bound)
         return true;
+
     return false;
+}
+
+void MenuOptions::DeleteBadEggs(double _bound)
+{
+    queue<DATA> badEggs = tree->AVL_RemoveUncommon(EvaluateUncommon, _bound);
+    queue<DATA> copy;
+    cout << "Deleted " << to_string(badEggs.size());
+    while (!badEggs.empty())
+    {
+        tree->AVL_Delete(badEggs.front().key);
+        copy.push(badEggs.front());
+        badEggs.pop();
+    }
+    if (WHAT_TO_REMOVE == 'W')
+        cout << " words ";
+    else if (WHAT_TO_REMOVE == 'P')
+        cout << " phrases ";
+    else
+        cout << " words & phrases ";
+    cout << "with frequency lower than " << to_string(_bound) << ".";
 }
 
 void MenuOptions::RemoveUncommon()
@@ -200,22 +229,7 @@ void MenuOptions::RemoveUncommon()
     else
         WHAT_TO_REMOVE = 'P';
 
-    queue<DATA> badEggs = tree->AVL_RemoveUncommon(EvaluateUncommon, bound);
-    queue<DATA> copy;
-    cout << "Deleted " << to_string(badEggs.size());
-    if (WHAT_TO_REMOVE == 'W')
-        cout << " words ";
-    else if (WHAT_TO_REMOVE == 'P')
-        cout << " phrases ";
-    else
-        cout << " words & phrases ";
-    cout << "with frequency lower than " << to_string(bound) << ".";
-    while (!badEggs.empty())
-    {
-        tree->AVL_Delete(badEggs.front().key);
-        copy.push(badEggs.front());
-        badEggs.pop();
-    }
+    DeleteBadEggs(bound);
 }
 //endregion
 //endregion

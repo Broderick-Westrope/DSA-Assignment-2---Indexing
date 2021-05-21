@@ -1,0 +1,20 @@
+FUNCTION ComputeLPS_Array(candidate : The key of the node being checked , C : The number of letters in candidate , lps : A reference to the lps array being changed)
+    length := 0
+
+    lps[0] := 0
+
+    i := 1
+    DO
+        IF (candidate[i] = candidate[length])
+            Increment length
+            lps[i] = length
+            Increment i
+        ELSE
+            IF (length != 0)
+				length = lps[length - 1]
+            ELSE
+                lps[i] = 0
+                Increment i
+			ENDIF
+		ENDIF
+	WHILE (i < C)

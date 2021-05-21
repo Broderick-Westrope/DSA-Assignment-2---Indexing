@@ -68,25 +68,15 @@ int SavingLoading::LoadNodes(const string &_path)
         return 0;
     }
 
-    int wordCount;
-    string word, tempWord, articleData;
-    vector<string> pathsList;
-    vector<vector<int>> positionsList;
-    DATA tempData;
     int wordPos = 0;
-
+    string tempWord;
     string sLine;
 
-    while (!loadFile.eof()) //Go through whole file
+    while (loadFile >> tempWord) //Go through whole file
     {
-        loadFile >> tempWord;
+        string word, articleData;
 
-        if (tempWord == "" || tempWord == "\n")
-        {
-            break;
-        }
-
-        wordCount = stoi(tempWord);
+        int wordCount = stoi(tempWord);
 
         for (int i = 0; i < wordCount; i++)
         {
@@ -95,6 +85,10 @@ int SavingLoading::LoadNodes(const string &_path)
             if (i != wordCount - 1)
                 word += ' ';
         }
+
+        vector<string> pathsList;
+        vector<vector<int>> positionsList;
+        DATA tempData;
 
         for (int i = 0; i <= 50; i++) //Loop through the lines of chapters (max of 50 iterations)
         {
@@ -131,9 +125,6 @@ int SavingLoading::LoadNodes(const string &_path)
             wordPos += positions.size();
         }
 
-        if (word == "ha")
-            cout << word << " has " << pathsList.size() << endl;
-
         if (positionsList.empty())
             cout << "ERROR: The article positions were empty." << endl;
         else if (positionsList.size() != pathsList.size())
@@ -141,9 +132,10 @@ int SavingLoading::LoadNodes(const string &_path)
 
         tempData.key = word;
         tempData.wordCount = wordCount;
+        tempData.data.clear();
         for (int i = 0; i < positionsList.size(); i++)
         {
-            if (positionsList[i].empty() || positionsList[i].empty())
+            if (positionsList[i].empty())
                 continue;
             ARTICLE tempArticle(pathsList[i]);
             tempArticle.pos = positionsList[i];
@@ -161,10 +153,6 @@ int SavingLoading::LoadNodes(const string &_path)
         {
             tree->AVL_Insert(tempData); //Insert it as a new dictionary item
         }
-
-        word = "", tempWord = "", articleData = "";
-        pathsList.clear();
-        positionsList.clear();
     }
 
     if (wordPos == 0)

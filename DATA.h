@@ -24,18 +24,17 @@ public:
 
 class DATA //The Node's data
 {
-    double freq;
 public:
     string key;
     int wordCount;
     vector<ARTICLE> data;
 
-    double GetFrequency(int _wordCount)
+    double GetFrequency()
     {
         auto total = static_cast<double>(GetInstances());
         if (total == 0.0)
             return 0.0;
-        return (total / static_cast<double>(_wordCount)) * 1000.0;
+        return (total / static_cast<double>(WORD_COUNT)) * 1000.0;
     }
 
     int GetInstances()
@@ -52,7 +51,7 @@ public:
 
 bool operator<(DATA p1, DATA p2)
 {
-    return p1.GetFrequency(WORD_COUNT) < p2.GetFrequency(WORD_COUNT);
+    return p1.GetFrequency() < p2.GetFrequency();
 }
 
 ostream &operator<<(ostream &out, DATA &obj) //Saving Data

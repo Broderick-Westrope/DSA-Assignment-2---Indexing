@@ -1,0 +1,7 @@
+FUNCTION FindArticle(v : list of articles to search, path : the path we are looking for in v)
+    FOR (all of the articles in v)
+        IF (the path of this article = path) THEN
+            Return the index of this article in v
+		ENDIF
+	ENDFOR
+    Return -1

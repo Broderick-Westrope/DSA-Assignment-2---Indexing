@@ -1,0 +1,20 @@
+FUNCTION AddWord(newData : the data to be added to the tree, wordPos : the position that the word was found at, file : the file the word was found in)
+    exists := Use AVL_Retrieve(newData's key, reference to newData) to check if the word is already in the tree, and if so it updates our copy of the data, newData
+
+    articleIndex := Use FindArticle(newData's data, file) to find the file in newData's data, if it doesn't exist it returns -1
+    IF (newData's data is empty OR the articleIndex = -1, meaning file isn't in amongst the data)
+        tempArt := a new article/data with the path of file
+        Add wordPos to tempArt to mark where the word was found in the file
+        Add tempArt to newData's data
+    ELSE
+		Add the wordPos to the previously existing article/data within newData
+	ENDIF
+
+    IF (exists is TRUE, meaning the word is already in the tree)
+		Update the instance of the word in the tree given our newData
+        IF (The update was unsuccessful)
+            Tell the user there was an error with updating
+		ENDIF
+    ELSE
+        Insert the newData into the tree as a new word
+    ENDIF

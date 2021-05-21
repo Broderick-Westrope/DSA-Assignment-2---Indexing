@@ -1067,7 +1067,9 @@ void AvlTree<TYPE, KTYPE>::_getNodesInRange(NODE<TYPE> *root, KTYPE bound1, KTYP
     /* if root's data lies in range,
     then prints root's data */
     if (bound1 <= root->data.key && bound2 > root->data.key)
-        _v.push_back(root->data);
+        if (INCL_PHRASES || root->data.wordCount == 1)
+            _v.push_back(root->data);
+
 
     /* If root->data is smaller than bound2,
         then only we can get o/p keys
@@ -1127,9 +1129,7 @@ void AvlTree<TYPE, KTYPE>::_removeUncommon(NODE<TYPE> *ptr, double _bound, queue
         return;
 
     if (evaluate(ptr->data, _bound))
-    {
         _badEggs.push(ptr->data);
-    }
 
     _removeUncommon(ptr->left, _bound, _badEggs, evaluate);
     _removeUncommon(ptr->right, _bound, _badEggs, evaluate);

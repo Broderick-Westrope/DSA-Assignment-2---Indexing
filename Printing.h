@@ -34,10 +34,10 @@ void Printing::Search_PrintTable(vector<DATA> data)
 {
     double n = 1;
     //Headers
-    cout << setfill('$') << setw(60) << "$" << endl;
+    cout << setfill('$') << setw(66) << "$" << endl;
     cout << setfill(' ') << fixed;
     cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(60) << "*" << endl;
+    cout << setfill('*') << setw(66) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
@@ -51,7 +51,7 @@ void Printing::Search_PrintTable(vector<pair<DATA, int>> data)
 {
     double n = 1;
     //table header
-    cout << setfill('$') << setw(60) << "$" << endl;
+    cout << setfill('$') << setw(66) << "$" << endl;
     cout << setfill(' ') << fixed;
     cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
     cout << setfill('*') << setw(66) << "*" << endl;
@@ -69,10 +69,10 @@ void Printing::Search_PrintTable(priority_queue<DATA> data)
 {
     double n = 1;
     //table header
-    cout << setfill('$') << setw(60) << "$" << endl;
+    cout << setfill('$') << setw(66) << "$" << endl;
     cout << setfill(' ') << fixed;
     cout << setw(8) << "RESULT" << setw(24) << "WORD" << setw(10) << "FILE" << setw(22) << "FREQUENCY / COUNT" << endl;
-    cout << setfill('*') << setw(60) << "*" << endl;
+    cout << setfill('*') << setw(66) << "*" << endl;
     cout << setfill(' ') << fixed;
 
     //Data
@@ -89,7 +89,7 @@ void Printing::Search_PrintRow(DATA _node, int _index)
 {
     if (_node.data.empty())
         cout << "ERROR: No data to Search_PrintRow." << endl;
-    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(24) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(1) << setw(8) << _index << setprecision(4) << setw(24) << _node.key << setw(10) << "~TOTAL~" << setw(22) << _node.GetFrequency() << endl;
 
     for (int i = 0; i < _node.data.size(); i++)
     {
@@ -106,7 +106,7 @@ void Printing::Search_PrintNode(DATA _node)
 {
     cout << "WORD: " << _node.key << endl;
     cout << "NUMBER OF INSTANCES: " << _node.GetInstances() << endl;
-    cout << "FREQUENCY PER 1000 WORDS: " << setprecision(8) << _node.GetFrequency(WORD_COUNT) << setprecision(0) << endl;
+    cout << "FREQUENCY PER 1000 WORDS: " << setprecision(8) << _node.GetFrequency() << setprecision(0) << endl;
     cout << "LOCATIONS: " << endl;
     for (int i = 0; i < _node.data.size(); i++)
     {
@@ -128,7 +128,7 @@ void Dictionary_PrintRow(DATA *_node)
 
     if (_node->data.empty())
         cout << "ERROR: No data to Search_PrintRow." << endl;
-    cout << setprecision(4) << setw(24) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency(WORD_COUNT) << endl;
+    cout << setprecision(4) << setw(24) << _node->key << setw(10) << "~TOTAL~" << setw(22) << _node->GetFrequency() << endl;
 
     for (ARTICLE &d : _node->data)
     {

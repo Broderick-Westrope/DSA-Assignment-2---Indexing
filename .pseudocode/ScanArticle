@@ -1,0 +1,50 @@
+FUNCTION ScanArticle(fileName : name and path of the file to be scanned)
+    Open the file stream
+    Open the file specified by fileName
+    IF (the file stream failed to open the file) THEN
+        Tell the user of the error
+    ENDIF
+
+    wordCount := Defaults to 0 and is used to keep track of how many words were scanned
+	phraseCount := Defaults to 0 and is used to keep track of how many phrases were scanned
+
+    DO
+        word1 := the next word in the file, formatted using FormatKey(word1)
+        IF (word1 is empty, usually due to being only symbols that are taken away by formatting) THEN
+            Continue to the next loop
+		ENDIF
+        newData.data := A new empty list of articles as our data
+
+        newData.key := word1
+        newData.wordCount := 1
+        Add the word to the tree using AddWord(newData, wordCount, file)
+        Increment the wordCount cause we have added another word to the tree
+
+        IF (we are including phrases in our scanning) THEN
+            IF (word2 isn't empty)
+                newData.key := word2 and word1 as a two word phrase
+                newData.wordCount := 2
+				Add the phrase to the tree using AddWord(newData, wordCount, file)
+                Increment the phraseCount cause we have added another phrase to the tree
+
+                IF (word3 isn't empty)
+					newData.key := word3, word2, and word1 as a three word phrase
+					newData.wordCount := 3
+					Add the phrase to the tree using AddWord(newData, wordCount, file)
+					Increment the phraseCount cause we have added another phrase to the tree
+				ENDIF
+            ENDIF
+
+            word3 := word2
+            word2 := word1
+        ENDIF
+    WHILE (there are still words left to read in the article)
+
+	Tell the user how many words read using wordCount
+    IF (phraseCount > 0, meaning we read phrases)
+		Tell the user how many words read using wordCount
+	ENDIF
+	
+    Tell the user which file we read from using the file variable
+    Add wordCount to the global WORD_COUNT variable
+    Return wordCount

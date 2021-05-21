@@ -1,0 +1,11 @@
+FUNCTION Compare_LEV(candidate : data for the node being checked, input : data for the users search input)
+    IF (We dont want to include phrases in the search AND the candidates wordCount > 1)
+		Return 0
+	ENDIF
+
+    IF (the candidates key = the inputs key)
+        return 100;
+	ENDIF
+    score := 10 + the longest word out of either the candidates key or the inputs key
+    score := score - the levenshtien distance from GetLevDist(candidates key, inputs key)
+    Return score

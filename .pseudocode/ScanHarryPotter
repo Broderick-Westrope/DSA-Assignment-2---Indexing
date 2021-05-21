@@ -1,0 +1,5 @@
+FUNCTION ScanHarryPotter()
+    FOR (numbers 1 to 17, i)
+		wordCount := wordCount + ScanArticle(Harry Potter chapter i)
+	ENDFOR
+    Return wordCount;

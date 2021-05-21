@@ -1,0 +1,23 @@
+FUNCTION GetLevDist(input : the users search query, candidate : the word from the node being checked)
+    dist := a two-dimensional list of numbers that stores the levenshtein distance
+
+    FOR (each letter in in the users input, starting at 0)
+        dist[0][i] = i;
+	ENDFOR
+	
+    FOR (each letter in the candidate word, starting at 0)
+        dist[j][0] = j;
+    ENDFOR
+	
+    FOR (each letter in the users input, starting at 1, i)
+        FOR (each letter in the candidate word, starting at 1, j)
+            IF (the letter at i - 1 = the letter at j - 1) THEN
+                track := 0
+            ELSE
+                track := 1
+			ENDIF
+            t := the smallest out of either (the value at dist[i - 1][j] + 1) or (the value at dist[i][j - 1] + 1)
+            dist[i][j] := the smallest out of either (t) or (dist[i - 1][j - 1] + track)
+        ENDFOR
+    ENDFOR
+    Return dist[number of letter in input][number of letters in candidate];
