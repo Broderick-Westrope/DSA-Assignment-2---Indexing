@@ -1128,9 +1128,21 @@ void AvlTree<TYPE, KTYPE>::_removeUncommon(NODE<TYPE> *ptr, double _bound, queue
     if (!ptr)
         return;
 
-    if (evaluate(ptr->data, _bound))
-        _badEggs.push(ptr->data);
+    queue<NODE<TYPE> *> q;
+    q.push(ptr);
 
-    _removeUncommon(ptr->left, _bound, _badEggs, evaluate);
-    _removeUncommon(ptr->right, _bound, _badEggs, evaluate);
+    while (!q.empty())
+    {
+        NODE<TYPE> *node = q.front();
+
+        if (evaluate(node->data, _bound))
+            _badEggs.push(node->data);
+        q.pop();
+
+        if (node->left != nullptr)
+            q.push(node->left);
+
+        if (node->right != nullptr)
+            q.push(node->right);
+    }
 }

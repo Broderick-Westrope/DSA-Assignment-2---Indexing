@@ -1,0 +1,82 @@
+FUNCTION LoadNodes(path : the path of the file we are reading from)
+    Open a file stream
+	Tell the stream to read from path
+
+    IF (reading from path failed)
+        Tell the user it failed
+		Return 0
+	ENDIF
+    wordPos := 0
+
+    DO 
+        Read the wordcount of that word/phrase
+		
+        FOR (each word in this word/phrase)
+            Read the word
+            Add it to our total words in this word/phrase
+            IF (its not the last word in the word/phrase)
+                Add a space to our total words/phrase
+			ENDIF
+        ENDFOR
+
+        FOR (do this at most 50 times to prevent infinite loops)
+            IF (we have reached the 50th itteration of the loop)
+                Tell the user of the error
+                Break from the loop
+            ENDIF
+
+            Get the current line from the file
+
+            IF (the line is empty)
+                Skip to the next itteration of the loop
+            ELSE IF (if the line contains the symbol that respresent the start of a new word
+                Break from the loop
+			ENDIF
+
+            FOR (each letter in the line)
+                IF (this letter is a space)
+                    Remove everything up to that point from our copy of the line;
+                    Break from the loop
+				ENDIF
+                Add this letter to our path
+            ENDFOR
+
+            Add the path to our list of paths
+
+            Use GetArticle to turn our line of positions into a list of numbers
+            Add the positions to our list of positions
+            Increment the wordPos by the size of the positions list
+        ENDFOR
+
+        IF (there are no positions in our position list)
+            Tell the user of the error
+        ELSE IF (the size of the positions list doesnt match the size of the paths list)
+            Tell the user of the error
+
+		Create a new data container tempData
+        tempData's key = word;
+        tempData's wordCount = wordCount;
+        FOR (each list within the positions list)
+            IF (the positions list is empty)
+                Skip to the next itteration of the loop
+            Make a new article data type tempArticle
+			tempArticle's path = this path
+            tempArticle's position list = this position list
+            Add tempArticle to tempData's data
+        ENDFOR
+
+        Check if the data already exists in the tree using AVL_Retrieve
+        IF (it exists in the tree)
+			Update the data in the tree
+            IF (the update failed)
+                Tell the user that updating the data failed
+			ENDIF
+		ELSE
+            Insert the data into the tree using AVL_Insert
+        ENDIF
+    WHILE (there are still more words in the file)
+
+    IF (the word position is still 0)
+        Tell the user that no data was loaded from the file
+
+    Return the word position
